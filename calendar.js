@@ -1,4 +1,10 @@
 
+// 全局函数
+Vue.prototype.testingYear = function(year) { //检测当前年份是否是闰年 闰年返回true 可以被4整除不能被100 的事闰年 （平常年） 世纪年可以被400整除才是
+    // return year % 100 == 0 ? year % 400 == 0 ? true : false : year % 4 == 0 ? true : false
+    return year % 400 == 0 || year % 4 == 0 && year % 100 != 0
+}
+
 // 头部
 Vue.component('v-header', {
     template: `<div class="header_wrap">
@@ -108,8 +114,15 @@ Vue.component('date', {
                         31,
                     ]
                 },
-            ]
+            ],
+            currentYear: '',
+            currentMouth: '',
+            startDate: 1,
+            endDate: ''
         }
+    },
+    mounted: function() {
+        console.log(this.testingYear(2000))
     }
 })
 
