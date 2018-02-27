@@ -1,0 +1,58 @@
+
+@charset 'UTF-8';
+
+*{
+    margin: 0;
+    padding: 0;
+}
+
+/* v-header 组件 */
+.header{
+    &_wrap{
+        display: flex;
+        justify-content: space-between;
+    }
+}
+
+/* week组件css */
+.week{
+    &_wrap{
+        overflow: hidden;
+    }
+    
+    &_items{
+        $height: 40px;
+        width: 14.28%;
+        height: $height;
+        line-height: $height;
+        text-align: center;
+        font-size: 18px;
+        float: left;
+    }
+}
+
+/* date日期组件 */
+.date{
+    &_wrap{
+        overflow: hidden;
+    }
+    &_items{
+        // width: 14.28%;
+        // height: 200px;
+        overflow: hidden;
+    }
+    &_cont{
+        width: 14.28%;
+        height: 100px;
+        position: relative;
+        float: left;
+        .date_text{
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            font-size: 12rpx;
+            position: absolute;
+            top: 0; right: 0;
+        }
+    }
+}
