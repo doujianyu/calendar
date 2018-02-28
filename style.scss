@@ -5,12 +5,68 @@
     margin: 0;
     padding: 0;
 }
+// font-lib
+@font-face {
+    font-family: "iconfont";
+    src: url('data:application/x-font-woff;charset=utf-8;base64,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') format('woff');
+}
+.iconfont {
+    font-family:"iconfont" !important;
+    font-size:16px;
+    font-style:normal;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+.icon-jiantouzuo:before { content: "\e6bd"; }
+.icon-jiantouleft:before { content: "\e935"; }
+.icon-aileft:before { content: "\e6ca"; }
+.icon-jiantouyou:before { content: "\e61a"; }
+.icon-airight:before { content: "\e936"; }
+.icon-houtuileft:before { content: "\e937"; }
+.icon-jiantouright:before { content: "\e938"; }
+.icon-houtuiright:before { content: "\e939"; }
 
 /* v-header 组件 */
 .header{
+    $height: 80px;
     &_wrap{
+        height: $height;
+        line-height: $height;
         display: flex;
         justify-content: space-between;
+        background: #161515;
+        div{
+            flex: 1;
+        }
+    }
+    &_title{
+        color: #fff;
+        text-align: center;
+    }
+    &_prev,
+    &_next{
+        color: #fff;
+        box-sizing: border-box;
+        span{
+            font-size: 40px;
+        }
+    }
+    &_prev{
+        div{
+            padding-left: 20px;
+        }
+        span{
+            margin-left: 20rpx;
+        }
+    }
+    &_next{
+        div{
+            padding-right: 20px;
+        }
+        text-align: right;
+        span{
+            margin-right: 20rpx;
+        }
     }
 }
 
@@ -18,6 +74,7 @@
 .week{
     &_wrap{
         overflow: hidden;
+        border-bottom: 1px solid #ccc; 
     }
     
     &_items{
@@ -40,6 +97,7 @@
         // width: 14.28%;
         // height: 200px;
         overflow: hidden;
+        border-bottom: 1px solid #ccc;
     }
     &_cont{
         width: 14.28%;
