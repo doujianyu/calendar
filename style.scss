@@ -5,6 +5,9 @@
     margin: 0;
     padding: 0;
 }
+ul,ol,li{
+    list-style: none;
+}
 // font-lib
 @font-face {
     font-family: "iconfont";
@@ -35,38 +38,35 @@
         display: flex;
         justify-content: space-between;
         background: #161515;
-        div{
+        &>div{
             flex: 1;
         }
     }
     &_title{
         color: #fff;
         text-align: center;
+        font-size: 24px;
     }
     &_prev,
     &_next{
         color: #fff;
         box-sizing: border-box;
-        span{
+        div.iconfont{
             font-size: 40px;
+            display: inline;
         }
     }
     &_prev{
-        div{
+        div.iconfont{
             padding-left: 20px;
-        }
-        span{
-            margin-left: 20rpx;
         }
     }
     &_next{
-        div{
+        text-align: right;
+        div.iconfont{
             padding-right: 20px;
         }
-        text-align: right;
-        span{
-            margin-right: 20rpx;
-        }
+        
     }
 }
 
@@ -74,7 +74,8 @@
 .week{
     &_wrap{
         overflow: hidden;
-        border-bottom: 1px solid #ccc; 
+        border: 1px solid #ccc; 
+        margin-bottom: -1px;
     }
     
     &_items{
@@ -85,6 +86,8 @@
         text-align: center;
         font-size: 18px;
         float: left;
+        border-right: 1px solid #ccc;
+        margin-right: -1px;
     }
 }
 
@@ -92,18 +95,20 @@
 .date{
     &_wrap{
         overflow: hidden;
+        border: 1px solid #ccc;
     }
     &_items{
-        // width: 14.28%;
-        // height: 200px;
         overflow: hidden;
         border-bottom: 1px solid #ccc;
+        margin-bottom: -1px;
     }
     &_cont{
         width: 14.28%;
         height: 100px;
         position: relative;
         float: left;
+        border-right: 1px solid #ccc;
+        margin-right: -1px;
         .date_text{
             width: 20px;
             height: 20px;
