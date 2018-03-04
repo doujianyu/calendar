@@ -8,6 +8,10 @@
 ul,ol,li{
     list-style: none;
 }
+button{
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    outline: none;
+}
 // font-lib
 @font-face {
     font-family: "iconfont";
@@ -38,8 +42,67 @@ ul,ol,li{
         display: flex;
         justify-content: space-between;
         background: #161515;
+        position: relative;
         &>div{
             flex: 1;
+        }
+        & .selector_cont{
+            width: 500px;
+            background: #fff;
+            position: absolute;
+            right: 20%;top: 80px;
+            z-index: 9;
+            border: 1px solid #ccc;
+            line-height: 1;
+        }
+        & .selector_inp{
+            ul{
+                display: flex;
+                padding: 16px;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                li{
+                    width: 50%;
+                    font-size: 0;
+                    margin-bottom: 8px;
+                }
+                i{
+                    width: 12px;
+                    text-align: center;
+                    font-size: 12px;
+                    font-style: normal;
+                    display: inline-block;
+                }
+                label{
+                    width: 50px;
+                    font-size: 14px;
+                    display: inline-block;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                }
+                input{
+                    width: 152px;
+                    outline: none;
+                    height: 30px;
+                    padding-left: 8px;
+                    border-width: 2px;
+                }
+            }
+            
+        }
+        .btnFour{
+            text-align: center;
+            button{
+                width: 80%;
+                line-height: 40px;
+                font-size: 14px;
+                color: #fff;
+                background: #2711f0;
+                border: 0;
+                margin: 0 auto;
+                border-radius: 8px;
+            }
         }
     }
     &_title{

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "scss": "sass --watch style.scss:style.css --style compressed",
-    "start": "webpack --watch --mode development",
+    "start": "webpack --watch --mode development -p",
     "build": "webpack --mode production"
   },
   "repository": {

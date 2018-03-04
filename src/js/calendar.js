@@ -127,15 +127,25 @@ Vue.component("v-header", {
         </div>
 
         <div slot="btnThree"></div>
-        <div slot="btnFour"></div>
+        <div slot="btnFour" class="btnFour">
+            <button @click="selectorShowHide">
+                批量设置
+            </button>
+        </div>
 
         <div class="header_next" @click="next">
             <div class="iconfont icon-jiantouright"></div>
         </div>
 
-        <div class="selector_cont">
+        <div class="selector_cont" v-show="selectorOnOff">
             <div class="selector_inp">
-
+                <ul>
+                    <li v-for="(item, index) in selectorInput">
+                        <label :for="'selector_input' + index">{{item}}</label>
+                        <i>:</i>
+                        <input type="text" :id="'selector_input' + index" :placeholder="'请输入' + item" />
+                    </li>
+                </ul>
             </div>
         </div>
 
@@ -146,11 +156,15 @@ Vue.component("v-header", {
             currentYear: "",
             currentMonth: "",
             currentYearStr: "",
-            currentMonthStr: ""
+            currentMonthStr: "",
+            selectorOnOff: false
         }
     },
     props: ["date", "realTime", 'selectorInput'],
     methods: {
+        selectorShowHide(){
+            this.selectorOnOff = !this.selectorOnOff
+        },
         prev: function() {
             this.currentMonth--
             if (this.currentMonth < 0) {
@@ -364,7 +378,7 @@ function calendar(id, options) {
             selectorInput: options.selectorInput
         },
         template: `<div id='${id.substr(1)}'>
-            <v-header :date="date" :realTime="realTime" v-on:childBtnClick="childBtnClick"></v-header>
+            <v-header :date="date" :realTime="realTime" v-on:childBtnClick="childBtnClick" :selectorInput="selectorInput"></v-header>
             <week></week>
             <date :date="date" :realTime="realTime" :notepadKeyConfig="notepadKeyConfig" :notepadConfig="notepadConfig" :notepadNormalText="notepadNormalText" :batchDate="batchDate"></date>
         </div>`,
