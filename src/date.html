@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="../dist/calendar.js"></script>
+    <style>
+        #date{
+            width: 1000px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    
+    
+    <div id="date">
+
+    </div>
+    
+
+    <script>
+        
+        calendar('#date', {
+            notepadNormalText: '未设置',
+            notepadKeyConfig: {
+                price: '单价',
+                number: '数量',
+                price1: '单价1',
+                number1: '数量1',
+                price2: '单价2',
+                number2: '数量2',
+            },
+            notepadConfig: [
+                {
+                    time: '2018-03-01',
+                    notepadText: {
+                        price: '1800.00',
+                        number: '1',
+                        price1: '1800.00',
+                        number1: '1'
+                    }
+                },
+                {
+                    time: '2018-03-02',
+                    notepadText: {
+                        price: '1800.00',
+                        number: '1',
+                        price1: '1800.00',
+                        number1: '1'
+                    }
+                },
+            ],
+            batchDate: ['2018-02-01', '2018-02-31'],
+            selectorInput: [
+                '单价',
+                '数量'
+            ]
+        })
+
+    </script>
+
+</body>
+</html>

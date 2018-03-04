@@ -1,4 +1,11 @@
 
+// 引入vue
+let Vue = require('../../assets/vue')
+// let Vue = require('vue')
+
+// 引入样式
+require('../style/style.scss')
+
 // 全局函数
 Vue.prototype.testingYear = function(year) { //检测当前年份是否是闰年 闰年返回true 可以被4整除不能被100 的事闰年 （平常年） 世纪年可以被400整除才是 返回true为闰年 false 平年
     // return year % 100 == 0 ? year % 400 == 0 ? true : false : year % 4 == 0 ? true : false
@@ -70,6 +77,40 @@ Vue.prototype.getDayWeek = function(date, bol, thatDay) {
     }
 }
 
+//符合条件的时间戳转换成规定时间格式 （2018-01-03）
+Date.prototype.transformation = function () {
+    // 返回日期。
+    return `${this.getFullYear()}-${this.getMonth() + 1}-${this.getDate()}`                         
+}
+
+// 批量设置函数
+Vue.prototype.getBatchDate = function (startDate, endDate, queryWeek) {
+    let startArr = startDate.split('-')
+    let endArr = endDate.split('-')
+    // 获取开始时间距离1970年1月1日的时间
+    let startTime = new Date(startArr[0], startArr[1], startArr[2]).getTime()
+    // 获取结束时间距离1970年1月1日的时间
+    let endTime = new Date(endArr[0], endArr[1], endArr[2]).getTime()
+    // 储存符合条件的日期的数组
+    let timeStampTrue = []
+    // 判断符合条件的 周几
+    if (!isNaN(parseFloat(queryWeek))){
+        for (let k = startTime; k <= endTime;) {
+            let date = new Date(k)
+            let week = date.getDay() == queryWeek ? date.transformation() : ''
+            week && timeStampTrue.push(week)
+            k = k + 24 * 60 * 60 * 1000
+        }
+    }else {
+        for (let k = startTime; k <= endTime;) {
+            let date = new Date(k)
+            let week = date.transformation()
+            week && timeStampTrue.push(week)
+            k = k + 24 * 60 * 60 * 1000
+        }
+    }
+    return timeStampTrue
+}
 
 // 头部
 Vue.component("v-header", {
@@ -91,6 +132,13 @@ Vue.component("v-header", {
         <div class="header_next" @click="next">
             <div class="iconfont icon-jiantouright"></div>
         </div>
+
+        <div class="selector_cont">
+            <div class="selector_inp">
+
+            </div>
+        </div>
+
     </div>`,
     data: function() {
         return {
@@ -101,7 +149,7 @@ Vue.component("v-header", {
             currentMonthStr: ""
         }
     },
-    props: ["date", "realTime"],
+    props: ["date", "realTime", 'selectorInput'],
     methods: {
         prev: function() {
             this.currentMonth--
@@ -170,9 +218,15 @@ Vue.component("date", {
         <div v-for="item in currentDateArr" class="date_items">
             <div v-for="i in item.date" class="date_cont">
                 <span class="date_text">{{i.dayNum}}</span>
-                <ul>
-
-                </ul>
+                <div class="date_cont_scroll">
+                    <ul>
+                        <li v-for="(note, key) in i.notepad" :class="key == 'notmalText' ? 'date_cont_center' : '' ">
+                            <span>{{key == 'notmalText' ? '' : key + ' : '}}</span>
+                            <span>{{note}}</span>
+                        </li>
+                    </ul>
+                </div>
+                
             </div>
         </div>
     </div>`,
@@ -183,10 +237,13 @@ Vue.component("date", {
             currentMouth: ""
         };
     },
-    props: ["date", "realTime",'notepadConfig','notepadKeyConfig', 'notepadNormalText'],
+    props: ["date", "realTime", 'notepadConfig', 'notepadKeyConfig', 'notepadNormalText', 'batchDate'],
     methods: {
         getDateList: function() {
-            console.log("sada", this.date);
+            console.log("sada", this.batchDate);
+            console.log(this.batchDate[0])
+            console.log(this.getBatchDate(this.batchDate[0], this.batchDate[1]))
+            console.log(this.getBatchDate)
             let startDate = 1;
             let timeMsg = this.getDayWeek(this.date, this.realTime);
             console.log(timeMsg);
@@ -206,24 +263,21 @@ Vue.component("date", {
                     }
                     time = Date.parse(time)
                     let notepad = {}
-                    // console.log(this.notepadConfig);
-                    
-                        // console.log(i)
                     for(let a = 0, A = this.notepadConfig.length; a < A; a++){
                         if(this.notepadConfig[a].time == time){
-                            console.log(a)
                             for(let i in this.notepadKeyConfig){
-                                notepad[this.notepadKeyConfig[i]] = this.notepadConfig[a].notepadText[i];
+                                notepad[this.notepadKeyConfig[i]] = this.notepadConfig[a].notepadText[i]
                             }
+                            break
                         }
                     }
-                    console.log(notepad);
+                    if (JSON.stringify(notepad) == '{}'){
+                        notepad.notmalText = this.notepadNormalText
+                    }
                     weekDay.push({
                         dayNum: startDate,
                         timeStamp: time,
-                        notepad: {
-
-                        }
+                        notepad: notepad
                     });
                     startDate++
                 }
@@ -276,6 +330,7 @@ Vue.component("date", {
         ]
     }
 */
+
 function calendar(id, options) {
     let date = new Date()
     // 判断传入的时间是现实时间还是js时间 没传默认为 现实时间（true）
@@ -304,12 +359,14 @@ function calendar(id, options) {
             realTime: options.realTime,
             notepadConfig: options.notepadConfig,
             notepadKeyConfig: options.notepadKeyConfig,
-            notepadNormalText: options.notepadNormalText
+            notepadNormalText: options.notepadNormalText,
+            batchDate: options.batchDate,
+            selectorInput: options.selectorInput
         },
         template: `<div id='${id.substr(1)}'>
             <v-header :date="date" :realTime="realTime" v-on:childBtnClick="childBtnClick"></v-header>
             <week></week>
-            <date :date="date" :realTime="realTime" :notepadKeyConfig="notepadKeyConfig" :notepadConfig="notepadConfig" :notepadNormalText="notepadNormalText"></date>
+            <date :date="date" :realTime="realTime" :notepadKeyConfig="notepadKeyConfig" :notepadConfig="notepadConfig" :notepadNormalText="notepadNormalText" :batchDate="batchDate"></date>
         </div>`,
         methods: {
             childBtnClick: function(e) {
@@ -319,10 +376,12 @@ function calendar(id, options) {
             }
         },
         mounted: function() {
-            let link = document.createElement("link");
-            link.href = options.styleSheetUrl || "./style.css";
-            link.rel = "stylesheet";
-            document.querySelector("head").appendChild(link);
+            // let link = document.createElement("link");
+            // link.href = options.styleSheetUrl || "./style.css";
+            // link.rel = "stylesheet";
+            // document.querySelector("head").appendChild(link);
         }
     });
 }
+// 将函数calendar放在window下否则不可调用
+window.calendar = calendar

@@ -5,7 +5,9 @@
   "main": "calendar.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "sass --watch style.scss:style.css --style compressed"
+    "scss": "sass --watch style.scss:style.css --style compressed",
+    "start": "webpack --watch --mode development",
+    "build": "webpack --mode production"
   },
   "repository": {
     "type": "git",
@@ -16,5 +18,15 @@
   "bugs": {
     "url": "https://github.com/PotatoLovePotato/calendar/issues"
   },
-  "homepage": "https://github.com/PotatoLovePotato/calendar#readme"
+  "homepage": "https://github.com/PotatoLovePotato/calendar#readme",
+  "dependencies": {
+    "vue": "^2.5.13"
+  },
+  "devDependencies": {
+    "css-loader": "^0.28.10",
+    "node-sass": "^4.7.2",
+    "sass-loader": "^6.0.7",
+    "style-loader": "^0.20.2",
+    "webpack-cli": "^2.0.10"
+  }
 }

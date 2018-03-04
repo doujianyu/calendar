@@ -6,7 +6,7 @@ sftp-config.json
 diff
 log
 npm-debug.log*
-lib/
+0/lib/
 demo/
 .vscode
 coverage
