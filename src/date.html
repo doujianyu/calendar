@@ -25,6 +25,12 @@
         
         calendar('#date', {
             notepadNormalText: '未设置',
+            notepadColor: 'red',
+            notepadFontSize: '12px',
+            borderWidth: '2px',
+            borderColor: 'red',
+            titleWeekFontSize: '20px',
+            titleWeekFontColor: 'red',
             notepadKeyConfig: {
                 price: '单价',
                 number: '数量'
@@ -46,8 +52,8 @@
                 },
             ],
             batchDate: ['2018-02-01', '2018-02-31'],
-            success: (res) =>{
-
+            dateNotepadChange: (res) =>{
+                console.log(res)
             }
         })
 

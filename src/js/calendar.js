@@ -22,7 +22,6 @@ Vue.prototype.getDayWeek = function(date, bol, thatDay) {
         date = date.split('-')
         let year = date[0]
         let mouth = bol ? date[1] - 1 : parseFloat(date[1]);
-        console.log(mouth)
         let day = thatDay ? date[2] : '01'
         let yearType = this.testingYear(year)
         let week = new Date(year, mouth, day).getDay()
@@ -210,8 +209,8 @@ Vue.component("v-header", {
 
 // 头部星期组件
 Vue.component('week', {
-    template: `<ul class="week_wrap">
-        <li v-for="item in weekText" class="week_items">
+    template: `<ul class="week_wrap" :style="{borderWidth: borderWidth, marginBottom: '-' + borderWidth, borderColor: borderColor}">
+        <li v-for="item in weekText" class="week_items" :style="{borderWidth: borderWidth, borderColor: borderColor, marginRight: '-' + borderWidth, color: titleWeekFontColor, fontSize: titleWeekFontSize}">
             {{item}}
         </li>    
     </ul>`,
@@ -227,7 +226,8 @@ Vue.component('week', {
                 '六',
             ]   
         }
-    }
+    },
+    props: ['borderWidth', 'titleWeekFontColor', 'titleWeekFontSize', 'borderColor']
 })
 
 // 设置面板
@@ -324,7 +324,6 @@ Vue.component('selector', {
             e.stopPropagation()
         },
         determine(e){
-            console.log(this.selectorAll)
             if (this.selectorAll){
                 let startDate = this.startDate.indexOf('-') > -1 ? this.startDate.split('-') : this.startDate.indexOf('/') > -1 ? this.startDate.split('/') : ''
                 let endDate = this.endDate.indexOf('-') > -1 ? this.endDate.split('-') : this.endDate.indexOf('/') > -1 ? this.endDate.split('/') : ''
@@ -351,22 +350,21 @@ Vue.component('selector', {
 
                 let dateArr = []
                 for (let i = 0; i < timeData.length; i++) {
-                    console.log(timeData[i])
                     dateArr.push({
                         time: timeData[i].time,
                         notepadText: this.inputVals
                     })
                 }
-
                 this.$emit('changeMsg', dateArr, this.selectorAll)
+                this.inputVals = {} //改变对象的引用的地址防止改一全变
             }else{
                 
                 this.$emit('changeMsg', {
-                    notepadText: this.inputVals
+                    notepadText: this.inputVals 
                 }, this.selectorAll)
+                this.inputVals = {} //改变对象的引用的地址防止改一全变
             }
-            
-            // this.selectorShowHide()
+            this.selectorShowHide()
         }
     },
     mounted(){
@@ -377,13 +375,13 @@ Vue.component('selector', {
 
 // 每天日期
 Vue.component("date", {
-    template: `<div class="date_wrap">
+    template: `<div class="date_wrap" :style="{borderWidth: borderWidth, borderColor: borderColor}">
 
-        <div v-for="(i, index) in currentDateArr" class="date_cont" @click="setDateText(index, i.timeStamp)">
-            <span class="date_text">{{i.dayNum}}</span>
+        <div v-for="(i, index) in currentDateArr" class="date_cont" @click="i.dayNum ? setDateText(index, i.timeStamp) : null" :style="{borderWidth: borderWidth, marginRight: '-' + borderWidth, marginBottom: '-' + borderWidth, borderColor: borderColor}">
+            <span class="date_text" :style="{top: borderWidth}">{{i.dayNum}}</span>
             <div class="date_cont_scroll">
                 <ul>
-                    <li v-for="(note, key) in i.notepad" :class="key == 'notmalText' ? 'date_cont_center' : '' ">
+                    <li v-for="(note, key) in i.notepad" :class="key == 'notmalText' ? 'date_cont_center' : '' " :style="{color: notepadColor, fontSize: notepadFontSize}">
                         <span>{{key == 'notmalText' ? '' : key + ' : '}}</span>
                         <span>{{note}}</span>
                     </li>
@@ -400,7 +398,7 @@ Vue.component("date", {
             currentMouth: ""
         };
     },
-    props: ["date", "realTime", 'notepadConfig', 'notepadKeyConfig', 'notepadNormalText', 'batchDate'],
+    props: ["date", "realTime", 'notepadConfig', 'notepadKeyConfig', 'notepadNormalText', 'batchDate', 'notepadColor', 'notepadFontSize', 'borderWidth', 'borderColor'],
     methods: {
         setDateText(index, timeStamp){
             this.$emit('changeBtn', 'date', {
@@ -427,16 +425,12 @@ Vue.component("date", {
                     }
                     time = Date.parse(time)
                     let notepad = {}
-                    console.log(time)
                     for(let a = 0, A = this.notepadConfig.length; a < A; a++){
-                        console.log(this.notepadConfig[a].time)
                         if(this.notepadConfig[a].time == time){
-                            console.log(this.notepadKeyConfig)
                             for(let i in this.notepadKeyConfig){
-                                console.log(i)
                                 notepad[this.notepadKeyConfig[i]] = this.notepadConfig[a].notepadText[i]
                             }
-                            // break
+                            break
                         }
                     }
                     if (JSON.stringify(notepad) == '{}'){
@@ -449,16 +443,8 @@ Vue.component("date", {
                     });
                     startDate++
                 }
-                
-                // if (weekDay.length == 7) {
-                //     timeObj.push({ date: weekDay });
-                //     weekDay = [];
-                // }
             }
-            // weekDay.length > 0 && timeObj.push({ date: weekDay });
             this.currentDateArr = timeObj;
-            console.log(this.currentDateArr)
-            // this.$emit('notepadDateChange', this.currentDateArr)
         }
     },
     mounted: function() {
@@ -482,6 +468,8 @@ Vue.component("date", {
         date: '指定的当前显示月份 不穿为当前时间的月份',
         realTime: '当前时间是现实时间还是js时间, 默认为现实时间',
         borderWidth: '边框线的像素',
+        titleWeekFontSize: '星期栏字体大小',
+        titleWeekFontColor: '星期栏字体颜色',
         itemsTextChange: '时间单元格内容变化时',
         styleSheetUrl: '插件样式表路径 默认 ./style.css',
         notepadNormalText: '单元格默认文本 默认为空'，
@@ -529,10 +517,16 @@ function calendar(id, options) {
             date: options.date,
             contWidth: "",
             realTime: options.realTime,
+            borderWidth: options.borderWidth || '1px',
+            borderColor: options.borderColor || '#ccc',
+            titleWeekFontSize: options.titleWeekFontSize || '18px',
+            titleWeekFontColor: options.titleWeekFontColor || '#000',
             notepadConfig: options.notepadConfig,
             notepadKeyConfig: options.notepadKeyConfig,
             notepadNormalText: options.notepadNormalText,
             notepadDate: null,
+            notepadColor: options.notepadColor || '#000',
+            notepadFontSize: options.notepadFontSize || '12px',
             batchDate: options.batchDate,
             selectorInput: options.selectorInput,
             selectorOnOff: false,
@@ -551,7 +545,12 @@ function calendar(id, options) {
                 v-on:changeBtn="changeBtn"
             ></v-header>
 
-            <week></week>
+            <week 
+                :borderWidth="borderWidth"
+                :titleWeekFontColor="titleWeekFontColor"
+                :titleWeekFontSize="titleWeekFontSize"
+                :borderColor="borderColor"
+            ></week>
 
             <date 
                 :date="date" 
@@ -560,6 +559,10 @@ function calendar(id, options) {
                 :notepadConfig="notepadConfig" 
                 :notepadNormalText="notepadNormalText" 
                 :batchDate="batchDate"
+                :notepadFontSize="notepadFontSize"
+                :notepadColor="notepadColor"
+                :borderWidth="borderWidth"
+                :borderColor="borderColor"
                 v-on:changeBtn="changeBtn"
                 v-on:notepadDateChange="notepadDateChange"
             ></date>
@@ -584,6 +587,13 @@ function calendar(id, options) {
             },
             changeMsg(data){
                 if (this.selectorAll){ //判断点击的是批量添加还是单个时间
+                    let change = false
+                    for(let i in data[0].notepadText){
+                        change = true
+                        break
+                    }      
+                    if(!change) return         
+
                     this.notepadConfig = data.map(function (item) {
                         let itemTime = item.time.split('-')
                         itemTime[1]--
@@ -593,24 +603,57 @@ function calendar(id, options) {
                             notepadText: item.notepadText
                         }
                     })
+                    
+                    if (typeof options.dateNotepadChange == 'function'){
+                        let exportDateArr = []
+                        for(let i = 0; i < this.notepadConfig.length; i++){
+                            exportDateArr.push({
+                                time: new Date(this.notepadConfig[i].time).transformation(),
+                                notepadText: { ...this.notepadConfig[i].notepadText},
+                                timeStamp: this.notepadConfig[i].time
+                            })
+                        }
+                        options.dateNotepadChange(exportDateArr)
+                    }
                 }else {
-                    let notepadConfig = this.notepadConfig
-
+                    let notepadConfig = [...this.notepadConfig] //改变对象的引用的地址 否则vue监听不到数据变化
+                    let changeOnOff = false
+                    for(let i in data.notepadText){
+                        changeOnOff = true
+                    }
+                    if(!changeOnOff) return
+                    let add = true 
+                    let exportDateArr = []
                     for(let i = 0; i < this.notepadConfig.length; i++){
                         if (this.notepadConfig[i].time == this.timeStamp){
-                            console.log(this.timeStamp)
-                            console.log(data.notepadText)
-                            for (let a in data.notepadText){
-                                console.log('asdasd',a)
-                                console.log('ssss',this.notepadConfig[i].notepadText[a])
-                                console.log('ssss', data.notepadText[a])
-                                // this.notepadConfig[i].notepadText[a] = data.notepadText[a]
-                                this.$set(this.notepadConfig[i].notepadText, a, data.notepadText[a])
-                                console.log(1)
+                            let dateMsg = {
+                                time: this.timeStamp,
+                                notepadText: data.notepadText
                             }
+                            notepadConfig[i] = dateMsg
+                            exportDateArr.push({
+                                time: new Date(dateMsg.time).transformation(),
+                                notepadText: { ...dateMsg.notepadText }, // 防止改变数组时影响vue数据
+                                timeStamp: dateMsg.time
+                            })
+                            add = false
+                            break
                         }
                     }
-                    console.log('qweqweqwe',this.notepadConfig)
+                    if(add){ // 判断是修改还是添加
+                        let dateMsg = {
+                            time: this.timeStamp,
+                            notepadText: data.notepadText
+                        }
+                        notepadConfig.push(dateMsg)
+                        exportDateArr.push({
+                            time: new Date(dateMsg.time).transformation(),
+                            notepadText: { ...dateMsg.notepadText}, // 防止改变数组时影响vue数据
+                            timeStamp: dateMsg.time
+                        })
+                    }
+                    this.notepadConfig = notepadConfig
+                    typeof options.dateNotepadChange == 'function' && options.dateNotepadChange(exportDateArr)
                 }
                 
             },
@@ -623,17 +666,13 @@ function calendar(id, options) {
                     this.selectorTitle = '设置'
                     this.selectorAll = false
                 }
-                console.log(data)
                 if (data && id == 'date'){
                     this.timeStamp = data.timeStamp
                 }
             }
         },
         mounted: function() {
-            // let link = document.createElement("link");
-            // link.href = options.styleSheetUrl || "./style.css";
-            // link.rel = "stylesheet";
-            // document.querySelector("head").appendChild(link);
+            
         }
     });
 }
