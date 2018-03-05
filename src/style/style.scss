@@ -1,99 +1,88 @@
-
 @charset 'UTF-8';
-
-*{
+* {
     margin: 0;
     padding: 0;
 }
-ul,ol,li{
+
+ul,
+ol,
+li {
     list-style: none;
 }
-button{
-    -webkit-tap-highlight-color: rgba(0,0,0,0);
+
+button {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
     outline: none;
 }
+
 // font-lib
 @font-face {
     font-family: "iconfont";
-    src: url('data:application/x-font-woff;charset=utf-8;base64,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') format('woff');
+    src: url('data:application/x-font-woff;charset=utf-8;base64,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') format('woff');
 }
+
 .iconfont {
-    font-family:"iconfont" !important;
-    font-size:16px;
-    font-style:normal;
+    font-family: "iconfont" !important;
+    font-size: 16px;
+    font-style: normal;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
-.icon-jiantouzuo:before { content: "\e6bd"; }
-.icon-jiantouleft:before { content: "\e935"; }
-.icon-aileft:before { content: "\e6ca"; }
-.icon-jiantouyou:before { content: "\e61a"; }
-.icon-airight:before { content: "\e936"; }
-.icon-houtuileft:before { content: "\e937"; }
-.icon-jiantouright:before { content: "\e938"; }
-.icon-houtuiright:before { content: "\e939"; }
+
+.icon-guanbi:before {
+    content: "\e6b7";
+}
+
+.icon-jiantouzuo:before {
+    content: "\e6bd";
+}
+
+.icon-jiantouleft:before {
+    content: "\e935";
+}
+
+.icon-aileft:before {
+    content: "\e6ca";
+}
+
+.icon-jiantouyou:before {
+    content: "\e61a";
+}
+
+.icon-airight:before {
+    content: "\e936";
+}
+
+.icon-houtuileft:before {
+    content: "\e937";
+}
+
+.icon-jiantouright:before {
+    content: "\e938";
+}
+
+.icon-houtuiright:before {
+    content: "\e939";
+}
+
 
 /* v-header 组件 */
-.header{
+
+.header {
     $height: 80px;
-    &_wrap{
+    &_wrap {
         height: $height;
         line-height: $height;
         display: flex;
         justify-content: space-between;
         background: #161515;
         position: relative;
-        &>div{
+        &>div {
             flex: 1;
         }
-        & .selector_cont{
-            width: 500px;
-            background: #fff;
-            position: absolute;
-            right: 20%;top: 80px;
-            z-index: 9;
-            border: 1px solid #ccc;
-            line-height: 1;
-        }
-        & .selector_inp{
-            ul{
-                display: flex;
-                padding: 16px;
-                justify-content: space-between;
-                flex-wrap: wrap;
-                li{
-                    width: 50%;
-                    font-size: 0;
-                    margin-bottom: 8px;
-                }
-                i{
-                    width: 12px;
-                    text-align: center;
-                    font-size: 12px;
-                    font-style: normal;
-                    display: inline-block;
-                }
-                label{
-                    width: 50px;
-                    font-size: 14px;
-                    display: inline-block;
-                    overflow: hidden;
-                    text-overflow: ellipsis;
-                    white-space: nowrap;
-                }
-                input{
-                    width: 152px;
-                    outline: none;
-                    height: 30px;
-                    padding-left: 8px;
-                    border-width: 2px;
-                }
-            }
-            
-        }
-        .btnFour{
+        .btnFour {
             text-align: center;
-            button{
+            button {
                 width: 80%;
                 line-height: 40px;
                 font-size: 14px;
@@ -105,43 +94,149 @@ button{
             }
         }
     }
-    &_title{
+    &_title {
         color: #fff;
         text-align: center;
         font-size: 24px;
     }
     &_prev,
-    &_next{
+    &_next {
         color: #fff;
         box-sizing: border-box;
-        div.iconfont{
+        div.iconfont {
             font-size: 40px;
             display: inline;
         }
     }
-    &_prev{
-        div.iconfont{
+    &_prev {
+        div.iconfont {
             padding-left: 20px;
         }
     }
-    &_next{
+    &_next {
         text-align: right;
-        div.iconfont{
+        div.iconfont {
             padding-right: 20px;
         }
-        
     }
 }
 
+
+/* 设置框 */
+
+.selector {
+    &_wrap {
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, .5);
+        position: fixed;
+        left: 0;
+        top: 0;
+        z-index: 99;
+        input {
+            outline: none;
+        }
+    }
+    &_tit {
+        background: #161515;
+        color: #fff;
+        font-size: 18px;
+        line-height: 40px;
+        padding-left: 1em;
+        .iconfont {
+            float: right;
+            margin-right: 1em;
+            font-size: 20px;
+        }
+    }
+    &_cont {
+        width: 500px;
+        background: #fff;
+        margin-left: -250px;
+        position: absolute;
+        left: 50%;
+        top: 20%;
+        z-index: 9; // border: 1px solid #ccc;
+        line-height: 1;
+    }
+    &_inp {
+        ul {
+            display: flex;
+            padding: 16px;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            li {
+                width: 50%;
+                font-size: 0;
+                margin-bottom: 8px;
+            }
+            i {
+                width: 12px;
+                text-align: center;
+                font-size: 12px;
+                font-style: normal;
+                display: inline-block;
+            }
+            label {
+                width: 50px;
+                font-size: 14px;
+                display: inline-block;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            input {
+                width: 152px;
+                outline: none;
+                height: 30px;
+                padding-left: 8px;
+                border-width: 2px;
+            }
+        }
+    }
+    &_range {
+        padding-bottom: 16px;
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 16px;
+            p {
+                input {
+                    width: 216px;
+                    height: 30px;
+                    padding-left: 8px;
+                }
+            }
+            label {
+                flex: 1;
+            }
+        }
+    }
+    &_btns {
+        padding: 16px;
+        text-align: right;
+        button {
+            width: 80px;
+            height: 30px;
+        }
+        button:first-child {
+            background: #2711f0;
+            border: 0;
+            color: #fff;
+        }
+    }
+}
+
+
 /* week组件css */
-.week{
-    &_wrap{
+
+.week {
+    &_wrap {
         overflow: hidden;
-        border: 1px solid #ccc; 
+        border: 1px solid #ccc;
         margin-bottom: -1px;
     }
-    
-    &_items{
+    &_items {
         $height: 40px;
         width: 14.28%;
         height: $height;
@@ -151,68 +246,67 @@ button{
         float: left;
         border-right: 1px solid #ccc;
         margin-right: -1px;
-        &:nth-of-type(7n){
+        &:nth-of-type(7n) {
             border: 0;
         }
     }
 }
 
+
 /* date日期组件 */
-.date{
-    &_wrap{
+
+.date {
+    &_wrap {
         overflow: hidden;
         border: 1px solid #ccc;
     }
-    &_items{
-        overflow: hidden;
-        border-bottom: 1px solid #ccc;
-        margin-bottom: -1px;
-    }
-    &_cont{
+    &_cont {
         width: 14.28%;
         height: 100px;
         position: relative;
         float: left;
         border-right: 1px solid #ccc;
+        border-bottom: 1px solid #ccc;
         margin-right: -1px;
-        
-        &:nth-of-type(7n){
-            border: 0;
+        margin-bottom: -1px;
+        &:nth-of-type(7n) {
+            border-right: 0;
         }
-        &_scroll{
+        &_scroll {
             width: 100%;
             height: 100%;
             position: absolute;
-            left: 0;top: 0;
+            left: 0;
+            top: 0;
             overflow-y: auto;
             &::-webkit-scrollbar {
                 width: 0px;
                 height: 0px;
             }
-            &:after{
+            &:after {
                 content: "";
                 height: 100%;
                 vertical-align: middle;
                 display: inline-block;
             }
-            ul{
+            ul {
                 display: inline-block;
                 vertical-align: middle;
                 font-size: 12px;
                 padding: 8px;
             }
         }
-        
-        &_center{
+        &_center {
             text-align: center;
         }
-        .date_text{
+        .date_text {
             width: 20px;
             height: 20px;
             text-align: center;
             font-size: 12rpx;
             position: absolute;
-            top: 1px; right: 0;
+            top: 1px;
+            right: 0;
             background: #fff;
         }
     }

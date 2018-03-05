@@ -83,8 +83,9 @@ Date.prototype.transformation = function () {
     return `${this.getFullYear()}-${this.getMonth() + 1}-${this.getDate()}`                         
 }
 
-// 批量设置函数
+// 批量设置查询函数
 Vue.prototype.getBatchDate = function (startDate, endDate, queryWeek) {
+    queryWeek = queryWeek ? queryWeek : []
     let startArr = startDate.split('-')
     let endArr = endDate.split('-')
     // 获取开始时间距离1970年1月1日的时间
@@ -94,20 +95,33 @@ Vue.prototype.getBatchDate = function (startDate, endDate, queryWeek) {
     // 储存符合条件的日期的数组
     let timeStampTrue = []
     // 判断符合条件的 周几
-    if (!isNaN(parseFloat(queryWeek))){
+    if (queryWeek.length > 0){
         for (let k = startTime; k <= endTime;) {
             let date = new Date(k)
-            let week = date.getDay() == queryWeek ? date.transformation() : ''
-            week && timeStampTrue.push(week)
+            for(let i = 0; i < queryWeek.length; i++){
+                let week = date.getDay() == queryWeek[i] ? date.transformation() : ''
+                week && timeStampTrue.push({
+                    time: week,
+                    timeStamp: k
+                })
+            }
             k = k + 24 * 60 * 60 * 1000
         }
     }else {
         for (let k = startTime; k <= endTime;) {
             let date = new Date(k)
             let week = date.transformation()
-            week && timeStampTrue.push(week)
+            week && timeStampTrue.push({
+                time: week,
+                timeStamp: k
+            })
             k = k + 24 * 60 * 60 * 1000
         }
+    }
+    if(timeStampTrue.length > 0){
+        timeStampTrue = timeStampTrue.sort( (a, b) => {
+            return a.timeStamp - b.timeStamp
+        })
     }
     return timeStampTrue
 }
@@ -137,18 +151,6 @@ Vue.component("v-header", {
             <div class="iconfont icon-jiantouright"></div>
         </div>
 
-        <div class="selector_cont" v-show="selectorOnOff">
-            <div class="selector_inp">
-                <ul>
-                    <li v-for="(item, index) in selectorInput">
-                        <label :for="'selector_input' + index">{{item}}</label>
-                        <i>:</i>
-                        <input type="text" :id="'selector_input' + index" :placeholder="'请输入' + item" />
-                    </li>
-                </ul>
-            </div>
-        </div>
-
     </div>`,
     data: function() {
         return {
@@ -157,13 +159,15 @@ Vue.component("v-header", {
             currentMonth: "",
             currentYearStr: "",
             currentMonthStr: "",
-            selectorOnOff: false
         }
     },
-    props: ["date", "realTime", 'selectorInput'],
+    computed: {
+        
+    },
+    props: ["date", "realTime", 'selectorInput', 'selectorOnOff'],
     methods: {
         selectorShowHide(){
-            this.selectorOnOff = !this.selectorOnOff
+            this.$emit('changeBtn', 'header')
         },
         prev: function() {
             this.currentMonth--
@@ -226,23 +230,168 @@ Vue.component('week', {
     }
 })
 
+// 设置面板
+Vue.component('selector', {
+    template: `<div class="selector_wrap" v-show="selectorOnOff" @click="selectorShowHide">
+        <div class="selector_cont" v-show="selectorOnOff" @click="stopPropagation">
+            <div class="selector_tit">
+                <span>{{selectorTit}}</span>
+                <span class="iconfont icon-guanbi" @click="selectorShowHide"></span>
+            </div>
+            <div class="selector_inp">
+                <ul>
+                    <li v-for="(item, index) in selectorInput">
+                        <label :for="'selector_input' + index">{{item}}</label>
+                        <i>:</i>
+                        <input type="text" :id="'selector_input' + index" :placeholder="'请输入' + item" v-model="inputVals[index]"/>
+                    </li>
+                </ul>
+            </div>
+            <div class="selector_range" v-show="selectorAll">
+                <ul>
+                    <li>日期范围:</li>
+                    <li>
+                        <p><input type="text" placeholder="开始时间 如: xxxx-xx-xx 或 xxxx/xx/xx" v-model="startDate" /></p>
+                        <p><input type="text" placeholder="结束时间 如: xxxx-xx-xx 或 xxxx/xx/xx" v-model="endDate" /></p>
+                    </li>
+                    <li>星期范围:</li>
+                    <li class="week_input_wrap">
+                        <label>
+                            <input type="checkbox" name="sun" v-model="week[0]" value="0"/>
+                            周日
+                        </label>
+                        <label>
+                            <input type="checkbox" name="mon" v-model="week[1]" value="1"/>
+                            周一
+                        </label>
+                        <label>
+                            <input type="checkbox" name="tues" v-model="week[2]" value="2"/>
+                            周二
+                        </label>
+                        <label>
+                            <input type="checkbox" name="wednes" v-model="week[3]" value="3"/>
+                            周三
+                        </label>
+                        <label>
+                            <input type="checkbox" name="thurs" v-model="week[4]" value="4"/>
+                            周四
+                        </label>
+                        <label>
+                            <input type="checkbox" name="fri" v-model="week[5]" value="5"/>
+                            周五
+                        </label>
+                        <label>
+                            <input type="checkbox" name="week" v-model="week[6]" value="6"/>
+                            周六
+                        </label>
+                    </li>
+                </ul>
+            </div>
+            <div class="selector_btns">
+                <button @click="determine">确定</button>
+                <button @click="selectorShowHide">取消</button>
+            </div>
+        </div>
+    </div>`,
+    data(){
+        return {
+            inputVals: {},
+            startDate: '',
+            endDate: '',
+            dateReg: /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/,
+            week: []
+        }
+    },
+    computed: {
+        selectorTit(){
+            return this.selectorTitle || '设置'
+        }
+    },
+    props: [
+        'selectorOnOff',
+        'selectorInput',
+        'selectorTitle',
+        'selectorAll'
+    ],
+    watch: {
+        
+    },
+    methods: {
+        selectorShowHide(index){
+            this.$emit('changeBtn', 'selector')
+        },
+        stopPropagation(e){
+            e.stopPropagation()
+        },
+        determine(e){
+            console.log(this.selectorAll)
+            if (this.selectorAll){
+                let startDate = this.startDate.indexOf('-') > -1 ? this.startDate.split('-') : this.startDate.indexOf('/') > -1 ? this.startDate.split('/') : ''
+                let endDate = this.endDate.indexOf('-') > -1 ? this.endDate.split('-') : this.endDate.indexOf('/') > -1 ? this.endDate.split('/') : ''
+
+                if (startDate || endDate) {
+                    startDate[1] = startDate[1] - 1
+                    endDate[1] = endDate[1] - 1
+                } else {
+                    alert('时间格式不正确')
+                    return
+                }
+
+                if (this.week.length > 0) {
+                    let arr = []
+                    for (let i = 0; i < this.week.length; i++) {
+                        if (this.week[i]) {
+                            arr.push(i) //因为getBatchDate函数接受星期参数是暂时只支持数组的每一个元素为数字
+                        }
+                    }
+                    var timeData = this.getBatchDate(startDate.join('-'), endDate.join('-'), arr)
+                } else {
+                    var timeData = this.getBatchDate(startDate.join('-'), endDate.join('-'))
+                }
+
+                let dateArr = []
+                for (let i = 0; i < timeData.length; i++) {
+                    console.log(timeData[i])
+                    dateArr.push({
+                        time: timeData[i].time,
+                        notepadText: this.inputVals
+                    })
+                }
+
+                this.$emit('changeMsg', dateArr, this.selectorAll)
+            }else{
+                
+                this.$emit('changeMsg', {
+                    notepadText: this.inputVals
+                }, this.selectorAll)
+            }
+            
+            // this.selectorShowHide()
+        }
+    },
+    mounted(){
+        
+    }
+}) 
+
+
 // 每天日期
 Vue.component("date", {
     template: `<div class="date_wrap">
-        <div v-for="item in currentDateArr" class="date_items">
-            <div v-for="i in item.date" class="date_cont">
-                <span class="date_text">{{i.dayNum}}</span>
-                <div class="date_cont_scroll">
-                    <ul>
-                        <li v-for="(note, key) in i.notepad" :class="key == 'notmalText' ? 'date_cont_center' : '' ">
-                            <span>{{key == 'notmalText' ? '' : key + ' : '}}</span>
-                            <span>{{note}}</span>
-                        </li>
-                    </ul>
-                </div>
-                
+
+        <div v-for="(i, index) in currentDateArr" class="date_cont" @click="setDateText(index, i.timeStamp)">
+            <span class="date_text">{{i.dayNum}}</span>
+            <div class="date_cont_scroll">
+                <ul>
+                    <li v-for="(note, key) in i.notepad" :class="key == 'notmalText' ? 'date_cont_center' : '' ">
+                        <span>{{key == 'notmalText' ? '' : key + ' : '}}</span>
+                        <span>{{note}}</span>
+                    </li>
+                </ul>
             </div>
+            
         </div>
+        
     </div>`,
     data: function() {
         return {
@@ -253,19 +402,20 @@ Vue.component("date", {
     },
     props: ["date", "realTime", 'notepadConfig', 'notepadKeyConfig', 'notepadNormalText', 'batchDate'],
     methods: {
-        getDateList: function() {
-            console.log("sada", this.batchDate);
-            console.log(this.batchDate[0])
-            console.log(this.getBatchDate(this.batchDate[0], this.batchDate[1]))
-            console.log(this.getBatchDate)
+        setDateText(index, timeStamp){
+            this.$emit('changeBtn', 'date', {
+                index: index,
+                timeStamp: timeStamp
+            })
+        },
+        getDateList() {
+            
             let startDate = 1;
             let timeMsg = this.getDayWeek(this.date, this.realTime);
-            console.log(timeMsg);
             let timeObj = [];
-            let weekDay = [];
             for (let i = 0, I = timeMsg.endDate + timeMsg.week; i < I; i++) {
                 if(i < timeMsg.week){
-                    weekDay.push({
+                    timeObj.push({
                         dayNum: ''
                     })
                 }else {
@@ -277,18 +427,22 @@ Vue.component("date", {
                     }
                     time = Date.parse(time)
                     let notepad = {}
+                    console.log(time)
                     for(let a = 0, A = this.notepadConfig.length; a < A; a++){
+                        console.log(this.notepadConfig[a].time)
                         if(this.notepadConfig[a].time == time){
+                            console.log(this.notepadKeyConfig)
                             for(let i in this.notepadKeyConfig){
+                                console.log(i)
                                 notepad[this.notepadKeyConfig[i]] = this.notepadConfig[a].notepadText[i]
                             }
-                            break
+                            // break
                         }
                     }
                     if (JSON.stringify(notepad) == '{}'){
                         notepad.notmalText = this.notepadNormalText
                     }
-                    weekDay.push({
+                    timeObj.push({
                         dayNum: startDate,
                         timeStamp: time,
                         notepad: notepad
@@ -296,14 +450,15 @@ Vue.component("date", {
                     startDate++
                 }
                 
-                if (weekDay.length == 7) {
-                    timeObj.push({ date: weekDay });
-                    weekDay = [];
-                }
+                // if (weekDay.length == 7) {
+                //     timeObj.push({ date: weekDay });
+                //     weekDay = [];
+                // }
             }
-            weekDay.length > 0 && timeObj.push({ date: weekDay });
-            console.log(timeObj);
+            // weekDay.length > 0 && timeObj.push({ date: weekDay });
             this.currentDateArr = timeObj;
+            console.log(this.currentDateArr)
+            // this.$emit('notepadDateChange', this.currentDateArr)
         }
     },
     mounted: function() {
@@ -311,7 +466,10 @@ Vue.component("date", {
     },
     watch: {
         date() {
-            this.getDateList();
+            this.getDateList()
+        },
+        notepadConfig(){
+            this.getDateList()
         }
     }
 });
@@ -353,7 +511,7 @@ function calendar(id, options) {
     options.date = options.date ? options.date : `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
 
     // 将 notepadConfig 里的时间转换成时间戳
-    options.notepadConfig = options.notepadConfig.map( function(item) {
+    options.notepadConfig = options.notepadConfig.map( (item) => {
         if(options.realTime){
             let itemTime = item.time.split('-')
             itemTime[1]--
@@ -374,19 +532,101 @@ function calendar(id, options) {
             notepadConfig: options.notepadConfig,
             notepadKeyConfig: options.notepadKeyConfig,
             notepadNormalText: options.notepadNormalText,
+            notepadDate: null,
             batchDate: options.batchDate,
-            selectorInput: options.selectorInput
+            selectorInput: options.selectorInput,
+            selectorOnOff: false,
+            selectorTitle: '',
+            selectorAll: false,
+            dateIndex: '',
+            timeStamp: ''
         },
         template: `<div id='${id.substr(1)}'>
-            <v-header :date="date" :realTime="realTime" v-on:childBtnClick="childBtnClick" :selectorInput="selectorInput"></v-header>
+            <v-header 
+                :date="date" 
+                :realTime="realTime" 
+                v-on:childBtnClick="childBtnClick" 
+                :selectorInput="notepadKeyConfig" 
+                :selectorOnOff="selectorOnOff" 
+                v-on:changeBtn="changeBtn"
+            ></v-header>
+
             <week></week>
-            <date :date="date" :realTime="realTime" :notepadKeyConfig="notepadKeyConfig" :notepadConfig="notepadConfig" :notepadNormalText="notepadNormalText" :batchDate="batchDate"></date>
+
+            <date 
+                :date="date" 
+                :realTime="realTime" 
+                :notepadKeyConfig="notepadKeyConfig" 
+                :notepadConfig="notepadConfig" 
+                :notepadNormalText="notepadNormalText" 
+                :batchDate="batchDate"
+                v-on:changeBtn="changeBtn"
+                v-on:notepadDateChange="notepadDateChange"
+            ></date>
+
+            <selector 
+                :selectorInput="notepadKeyConfig" 
+                :selectorOnOff="selectorOnOff" 
+                :selectorTitle="selectorTitle"
+                :selectorAll="selectorAll"
+                v-on:changeMsg="changeMsg"
+                v-on:changeBtn="changeBtn"
+            ></selector>
         </div>`,
         methods: {
-            childBtnClick: function(e) {
+            childBtnClick(e) {
                 let time = e.time.split("-");
                 this.realTime && time[1]++;
                 this.date = time.join("-");
+            },
+            notepadDateChange(data){
+                this.notepadDateChange = data
+            },
+            changeMsg(data){
+                if (this.selectorAll){ //判断点击的是批量添加还是单个时间
+                    this.notepadConfig = data.map(function (item) {
+                        let itemTime = item.time.split('-')
+                        itemTime[1]--
+
+                        return {
+                            time: Date.parse(new Date(itemTime[0], itemTime[1], itemTime[2])),
+                            notepadText: item.notepadText
+                        }
+                    })
+                }else {
+                    let notepadConfig = this.notepadConfig
+
+                    for(let i = 0; i < this.notepadConfig.length; i++){
+                        if (this.notepadConfig[i].time == this.timeStamp){
+                            console.log(this.timeStamp)
+                            console.log(data.notepadText)
+                            for (let a in data.notepadText){
+                                console.log('asdasd',a)
+                                console.log('ssss',this.notepadConfig[i].notepadText[a])
+                                console.log('ssss', data.notepadText[a])
+                                // this.notepadConfig[i].notepadText[a] = data.notepadText[a]
+                                this.$set(this.notepadConfig[i].notepadText, a, data.notepadText[a])
+                                console.log(1)
+                            }
+                        }
+                    }
+                    console.log('qweqweqwe',this.notepadConfig)
+                }
+                
+            },
+            changeBtn(id, data){ // 控制设置面板
+                this.selectorOnOff = !this.selectorOnOff
+                if(id == 'header'){
+                    this.selectorTitle = '批量设置'
+                    this.selectorAll = true
+                }else{
+                    this.selectorTitle = '设置'
+                    this.selectorAll = false
+                }
+                console.log(data)
+                if (data && id == 'date'){
+                    this.timeStamp = data.timeStamp
+                }
             }
         },
         mounted: function() {
