@@ -1,10 +1,11 @@
 # calendar
-基于vue的日历插件
+    基于vue的日历插件
 
-使用方法 直接调用 calendar(id, {options})
-参数 id = 页面元素的id string
+# 使用方法 
+    直接调用 calendar(id, {options})
+    参数 id = 页面元素的id string
 
-options 组件配置 
+# options 组件配置 
 
     {
         date: '指定的当前显示月份 不穿为当前时间的月份',
