@@ -27,5 +27,17 @@ options 组件配置
                     number: '1'
                 }
             }
-        ]
+        ],
+        dateNotepadChange: function(){
+            // 数据改变时的回调函数
+        },
+        nextBtnClick: function(){
+            // 点击下一个月按钮时触发
+        },
+        prevBtnClick: function(){
+            // 点击上一个月按钮时触发
+        },
+        toogleBtnClick: function(data){
+            // 点击上一个月和下一个月都会触发 data中带有标识
+        }
     }

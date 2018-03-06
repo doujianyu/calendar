@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/PotatoLovePotato/calendar#readme",
   "dependencies": {
+    "element-ui": "^2.2.1",
     "vue": "^2.5.13"
   },
   "devDependencies": {

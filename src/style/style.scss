@@ -1,4 +1,5 @@
 @charset 'UTF-8';
+@import url('https://unpkg.com/element-ui@2.2.1/lib/theme-chalk/index.css');
 * {
     margin: 0;
     padding: 0;
@@ -82,7 +83,7 @@ button {
         }
         .btnFour {
             text-align: center;
-            button {
+            .header_button {
                 width: 80%;
                 line-height: 40px;
                 font-size: 14px;
@@ -91,6 +92,7 @@ button {
                 border: 0;
                 margin: 0 auto;
                 border-radius: 8px;
+                display: inline-block;
             }
         }
     }
@@ -165,10 +167,13 @@ button {
             padding: 16px;
             justify-content: space-between;
             flex-wrap: wrap;
+            $height: 34px;
             li {
                 width: 50%;
                 font-size: 0;
                 margin-bottom: 8px;
+                height: $height;
+                line-height: $height;
             }
             i {
                 width: 12px;
@@ -179,11 +184,13 @@ button {
             }
             label {
                 width: 50px;
+                height: $height;
                 font-size: 14px;
                 display: inline-block;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+                vertical-align: -14px;
             }
             input {
                 width: 152px;
@@ -191,7 +198,16 @@ button {
                 height: 30px;
                 padding-left: 8px;
                 border-width: 2px;
+                font-size: 12px;
             }
+        }
+    }
+    &_data_popper {
+        left: 50%!important;
+        margin-left: -324px;
+        .popper__arrow{
+            left: 50%!important;
+            margin-left: -6px;
         }
     }
     &_range {
@@ -211,15 +227,22 @@ button {
                 flex: 1;
             }
         }
+        .date_picker_wrap {
+            justify-content: center;
+        }
     }
     &_btns {
         padding: 16px;
         text-align: right;
-        button {
+        div {
             width: 80px;
             height: 30px;
+            line-height: 30px;
+            display: inline-block;
+            text-align: center;
+            border: 1px solid #ccc;
         }
-        button:first-child {
+        div:first-child {
             background: #2711f0;
             border: 0;
             color: #fff;

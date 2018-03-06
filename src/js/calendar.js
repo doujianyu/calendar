@@ -1,7 +1,10 @@
 
 // 引入vue
 let Vue = require('../../assets/vue')
-// let Vue = require('vue')
+
+// 引入element
+import { DatePicker } from 'element-ui'
+// import 'element-ui/lib/theme-chalk/index.css' //引入报错
 
 // 引入样式
 require('../style/style.scss')
@@ -141,9 +144,9 @@ Vue.component("v-header", {
 
         <div slot="btnThree"></div>
         <div slot="btnFour" class="btnFour">
-            <button @click="selectorShowHide">
+            <div class="header_button" @click="selectorShowHide">
                 批量设置
-            </button>
+            </div>
         </div>
 
         <div class="header_next" @click="next">
@@ -230,6 +233,9 @@ Vue.component('week', {
     props: ['borderWidth', 'titleWeekFontColor', 'titleWeekFontSize', 'borderColor']
 })
 
+// elementUI日期选择组件
+Vue.component(DatePicker.name, DatePicker)
+
 // 设置面板
 Vue.component('selector', {
     template: `<div class="selector_wrap" v-show="selectorOnOff" @click="selectorShowHide">
@@ -238,6 +244,7 @@ Vue.component('selector', {
                 <span>{{selectorTit}}</span>
                 <span class="iconfont icon-guanbi" @click="selectorShowHide"></span>
             </div>
+            
             <div class="selector_inp">
                 <ul>
                     <li v-for="(item, index) in selectorInput">
@@ -247,12 +254,25 @@ Vue.component('selector', {
                     </li>
                 </ul>
             </div>
+            
             <div class="selector_range" v-show="selectorAll">
                 <ul>
                     <li>日期范围:</li>
-                    <li>
-                        <p><input type="text" placeholder="开始时间 如: xxxx-xx-xx 或 xxxx/xx/xx" v-model="startDate" /></p>
-                        <p><input type="text" placeholder="结束时间 如: xxxx-xx-xx 或 xxxx/xx/xx" v-model="endDate" /></p>
+                    <li class="date_picker_wrap">
+                        <!-- <p><input type="text" placeholder="开始时间 如: xxxx-xx-xx 或 xxxx/xx/xx" v-model="startDate" /></p>
+                        <p><input type="text" placeholder="结束时间 如: xxxx-xx-xx 或 xxxx/xx/xx" v-model="endDate" /></p> -->
+                        <el-date-picker
+                            v-model="datePickerValue"
+                            type="daterange"
+                            range-separator="至"
+                            start-placeholder="开始日期"
+                            end-placeholder="结束日期"
+                            :editable="editable"
+                            :unlink-panels="unlinkPanels"
+                            popper-class="selector_data_popper"
+                            @change="datePrickChange"
+                        >
+                        </el-date-picker>
                     </li>
                     <li>星期范围:</li>
                     <li class="week_input_wrap">
@@ -288,9 +308,10 @@ Vue.component('selector', {
                 </ul>
             </div>
             <div class="selector_btns">
-                <button @click="determine">确定</button>
-                <button @click="selectorShowHide">取消</button>
+                <div class="selector_btn1" @click="determine">确定</div>
+                <div class="selector_btn2" @click="selectorShowHide">取消</div>
             </div>
+
         </div>
     </div>`,
     data(){
@@ -299,7 +320,10 @@ Vue.component('selector', {
             startDate: '',
             endDate: '',
             dateReg: /^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}$/,
-            week: []
+            week: [],
+            datePickerValue: '',
+            editable: false,
+            unlinkPanels: true
         }
     },
     computed: {
@@ -323,18 +347,23 @@ Vue.component('selector', {
         stopPropagation(e){
             e.stopPropagation()
         },
+        datePrickChange(data){
+            if(data){
+                this.startDate = `${data[0].getFullYear()}-${data[0].getMonth()}-${data[0].getDate()}`
+                this.endDate = `${data[1].getFullYear()}-${data[1].getMonth()}-${data[1].getDate()}`
+            }else{
+                this.startDate = this.endDate = ''
+            }
+        },
         determine(e){
+            
             if (this.selectorAll){
-                let startDate = this.startDate.indexOf('-') > -1 ? this.startDate.split('-') : this.startDate.indexOf('/') > -1 ? this.startDate.split('/') : ''
-                let endDate = this.endDate.indexOf('-') > -1 ? this.endDate.split('-') : this.endDate.indexOf('/') > -1 ? this.endDate.split('/') : ''
-
-                if (startDate || endDate) {
-                    startDate[1] = startDate[1] - 1
-                    endDate[1] = endDate[1] - 1
-                } else {
+                if (!this.startDate || !this.endDate) {
                     alert('时间格式不正确')
                     return
                 }
+                let startDate = this.startDate.split('-')
+                let endDate = this.endDate.split('-') 
 
                 if (this.week.length > 0) {
                     let arr = []
@@ -343,6 +372,7 @@ Vue.component('selector', {
                             arr.push(i) //因为getBatchDate函数接受星期参数是暂时只支持数组的每一个元素为数字
                         }
                     }
+                    
                     var timeData = this.getBatchDate(startDate.join('-'), endDate.join('-'), arr)
                 } else {
                     var timeData = this.getBatchDate(startDate.join('-'), endDate.join('-'))
@@ -444,6 +474,14 @@ Vue.component("date", {
                     startDate++
                 }
             }
+            let surplus = 7 - (timeObj.length % 7)
+            if (surplus < 7){
+                for(let i = 0; i < surplus; i++){
+                    timeObj.push({
+                        dayNum: ''
+                    })
+                }
+            }
             this.currentDateArr = timeObj;
         }
     },
@@ -487,7 +525,22 @@ Vue.component("date", {
                     number: '1'
                 }
             }
-        ]
+        ],
+        dateNotepadChange: function(){
+            // 数据改变时的回调函数
+        },
+        nextBtnClick: function(){
+            // 点击下一个月按钮时触发
+            // this.notepadConfigUpdata 改变notepadConfigUpdata可以更新数据
+        },
+        prevBtnClick: function(){
+            // 点击上一个月按钮时触发
+            // this.notepadConfigUpdata 改变notepadConfigUpdata可以更新数据
+        },
+        toogleBtnClick: function(data){
+            // 点击上一个月和下一个月都会触发 data中带有标识
+            // this.notepadConfigUpdata 改变notepadConfigUpdata可以更新数据
+        }
     }
 */
 
@@ -522,6 +575,7 @@ function calendar(id, options) {
             titleWeekFontSize: options.titleWeekFontSize || '18px',
             titleWeekFontColor: options.titleWeekFontColor || '#000',
             notepadConfig: options.notepadConfig,
+            notepadConfigUpdata: '',
             notepadKeyConfig: options.notepadKeyConfig,
             notepadNormalText: options.notepadNormalText,
             notepadDate: null,
@@ -575,12 +629,21 @@ function calendar(id, options) {
                 v-on:changeMsg="changeMsg"
                 v-on:changeBtn="changeBtn"
             ></selector>
+            
         </div>`,
         methods: {
             childBtnClick(e) {
                 let time = e.time.split("-");
                 this.realTime && time[1]++;
                 this.date = time.join("-");
+                if(e.btnClick == 'next'){
+                    typeof options.nextBtnClick == 'function' && options.nextBtnClick.call(this)
+                }else if (e.btnClick == 'prev'){
+                    typeof options.prevBtnClick == 'function' && options.prevBtnClick.call(this)
+                }
+                typeof options.toogleBtnClick == 'function' && options.toogleBtnClick.call(this, {
+                    btnName: e.btnClick
+                })
             },
             notepadDateChange(data){
                 this.notepadDateChange = data
@@ -669,6 +732,19 @@ function calendar(id, options) {
                 if (data && id == 'date'){
                     this.timeStamp = data.timeStamp
                 }
+            }
+        },
+        watch: {
+            notepadConfigUpdata(newVal){
+                this.notepadConfig = newVal.map( item => {
+                    let itemTime = item.time.split('-')
+                    itemTime[1]--
+
+                    return {
+                        time: Date.parse(new Date(itemTime[0], itemTime[1], itemTime[2])),
+                        notepadText: item.notepadText
+                    }
+                })
             }
         },
         mounted: function() {
