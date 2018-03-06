@@ -4,7 +4,7 @@ let Vue = require('../../assets/vue')
 
 // 引入element
 import { DatePicker } from 'element-ui'
-// import 'element-ui/lib/theme-chalk/index.css' //引入报错
+import 'element-ui/lib/theme-chalk/index.css' //引入报错
 
 // 引入样式
 require('../style/style.scss')

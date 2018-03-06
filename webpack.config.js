@@ -19,10 +19,16 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                exclude: /node_modules/,
+                // exclude: /node_modules/, // 不包含
                 loader: "style-loader!css-loader"
             },
-
+            {
+                test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+                loader: 'url-loader',
+                options: {
+                    limit: 10000, // 小于多少转换成basb64
+                }
+            }
         ]
     }
 }

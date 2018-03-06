@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://at.alicdn.com/t/font_564739_hxor6bumk0fqolxr.css">
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        ul,li{
+            list-style: none;
+        }
+        h6{
+            font-weight: normal;
+        }
+        
+        .clearfix:after{
+            content: '';
+            display: block;
+            clear: both;
+        }
+        .wrap{
+            width: 800px;
+            margin: 0 auto;
+        }
+        
+        .selector_wrap li,
+        .selector_wrap h6,
+        .selector_wrap ul{
+            float: left;
+            line-height: 40px;
+        }
+        .selector_wrap h6{
+            font-size: 14px;
+            margin-right: 8px;
+        }
+        .selector_wrap li{
+            font-size: 18px;
+            margin-right: 6px;
+        }
+        .icon-sxwjx{
+            color: #e2f024;
+        }
+        .selector_comment{
+            height: 40px;
+            line-height: 40px;
+            text-indent: .5em;
+            border: 1px solid #ccc;
+            margin-bottom: 12px;
+        }
+        button{
+            width: 80px;
+            height: 40px;
+            background: #f07808;
+            color: #f0f0f0;
+            border: 0;
+            outline: none;
+            float: right;
+        }
+        .user_comment{
+            padding-top: 12px;
+        }
+        .user_comment p span{
+            margin-right: 10px;
+        }
+        .user_items{
+            border: 1px solid #ccc;
+            padding: 0 12px;
+            margin-bottom: 12px;
+        }
+        .user_items_table{
+            height: 60px;
+            display: table-cell;
+            vertical-align: middle;
+        }
+        .user_name,
+        .user_name+p{
+            font-size: 14px;
+        }
+        .user_score{
+            font-size: 16px;
+            color: #e2f024;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="wrap">
+        <div class="selector_wrap clearfix">
+            <h6>评分</h6>
+            <ul>
+                <li class="iconfont selector_score icon-sxwjx"></li>
+                <li class="iconfont selector_score icon-kbwjx"></li>
+                <li class="iconfont selector_score icon-kbwjx"></li>
+                <li class="iconfont selector_score icon-kbwjx"></li>
+                <li class="iconfont selector_score icon-kbwjx"></li>
+            </ul>
+        </div>
+        
+        <div class="selector_comment">
+            非常差
+        </div>
+
+        <div class="clearfix">
+            <button id="btn">提交</button>
+        </div>
+        
+        <div class="user_comment">
+
+        </div>
+    </div>
+
+    <script>
+        
+        let selectorScore = document.querySelectorAll('.selector_score')
+        let selectorComment = document.querySelector('.selector_comment')
+        let userComment = document.querySelector('.user_comment')
+        let submitBtn = document.querySelector('#btn')
+        let selectorCommentText = [
+            '非常差',
+            '一般',
+            '正常',
+            '满意',
+            '非常满意'
+        ]
+        let oldClassName = selectorScore[1].className
+        let userCommentList = []
+        let userMsg = {
+            userName: '',
+            scoreText: '非常差',
+            scoreNum: 1
+        }
+        let userNum = 0
+
+        removeClass = () => {
+            for (let i = 0; i < selectorScore.length; i++) {
+                selectorScore[i].className = oldClassName
+            }
+        }
+        addClass = index => {
+            for (let i = 0; i <= index; i++) {
+
+                selectorScore[i].className = `${oldClassName.replace('icon-kbwjx', '')} icon-sxwjx`
+            }
+        }
+        for(let i = 0; i < selectorScore.length; i++){
+            selectorScore[i].index = i
+            selectorScore[i].onmouseenter = function(){
+                removeClass()
+                addClass(this.index)
+                selectorComment.innerHTML = selectorCommentText[this.index]
+                userMsg.scoreText = selectorCommentText[this.index]
+                userMsg.scoreNum = this.index
+            }
+        }
+        console.log(submitBtn)
+        submitBtn.onclick = () => {
+            console.log(1)
+            userMsg.userName = `用户${userNum}`
+            userNum++
+            console.log(userMsg)
+            let scoreWjxNum = ''
+            for(let i = 0; i <= userMsg.scoreNum; i++){
+                scoreWjxNum += `<i class="iconfont user_score icon-sxwjx"></i>`
+            }
+            userComment.innerHTML += `<div class="user_items">
+                <div class="user_items_table">
+                    <p class="user_name">${userMsg.userName}</p>
+                    <p>
+                        <span>评分: ${userMsg.scoreText}</span>
+                        ${scoreWjxNum}
+                    </p>
+                </div>
+            </div>`
+        }
+
+    </script>
+
+</body>
+</html>
