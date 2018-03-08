@@ -4,7 +4,7 @@ let Vue = require('../../assets/vue')
 
 // 引入element
 import { DatePicker } from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css' //引入报错
+// import 'element-ui/lib/theme-chalk/index.css' //引入报错
 
 // 引入样式
 require('../style/style.scss')
@@ -82,7 +82,9 @@ Vue.prototype.getDayWeek = function(date, bol, thatDay) {
 //符合条件的时间戳转换成规定时间格式 （2018-01-03）
 Date.prototype.transformation = function () {
     // 返回日期。
-    return `${this.getFullYear()}-${this.getMonth() + 1}-${this.getDate()}`                         
+    let month = this.getMonth() + 1 > 9 ? this.getMonth() + 1 : `0${this.getMonth() + 1}`
+    let date = this.getDate() > 9 ? this.getDate() : `0${this.getDate()}`
+    return `${this.getFullYear()}-${month}-${date}`                         
 }
 
 // 批量设置查询函数
@@ -180,6 +182,7 @@ Vue.component("v-header", {
             this.$emit("childBtnClick", {
                 btnClick: "prev",
                 time: `${this.currentYear}-${this.currentMonth}-${new Date().getDate()}`,
+                currentDate: `${this.currentYear}-${this.currentMonth + 1 > 9 ? `${this.currentMonth + 1}` : `0${this.currentMonth + 1}`}`
             });
         },
         next: function() {
@@ -190,7 +193,8 @@ Vue.component("v-header", {
             }
             this.$emit("childBtnClick", {
                 btnClick: "next",
-                time: `${this.currentYear}-${this.currentMonth}-${new Date().getDate()}`
+                time: `${this.currentYear}-${this.currentMonth}-${new Date().getDate()}`,
+                currentDate: `${this.currentYear}-${this.currentMonth + 1 > 9 ? `${this.currentMonth + 1}` : `0${this.currentMonth + 1}`}`
             });
         }
     },
@@ -241,7 +245,8 @@ Vue.component('selector', {
     template: `<div class="selector_wrap" v-show="selectorOnOff" @click="selectorShowHide">
         <div class="selector_cont" v-show="selectorOnOff" @click="stopPropagation">
             <div class="selector_tit">
-                <span>{{selectorTit}}</span>
+                <span class="selector_tit_left">{{selectorTit}}</span>
+                <span>{{selectorDay}}</span>
                 <span class="iconfont icon-guanbi" @click="selectorShowHide"></span>
             </div>
             
@@ -329,13 +334,19 @@ Vue.component('selector', {
     computed: {
         selectorTit(){
             return this.selectorTitle || '设置'
+        },
+        selectorDay(){
+            if(!this.selectorData) return ''
+            let date = new Date(this.selectorData)
+            return `${date.getFullYear()}年${date.getMonth() + 1 > 9 ? `${date.getMonth() + 1}` : `0${date.getMonth() + 1}`}月${date.getDate() > 9 ? date.getDate() : `0${date.getDate()}`}日`
         }
     },
     props: [
         'selectorOnOff',
         'selectorInput',
         'selectorTitle',
-        'selectorAll'
+        'selectorAll',
+        'selectorData'
     ],
     watch: {
         
@@ -407,8 +418,31 @@ Vue.component('selector', {
 Vue.component("date", {
     template: `<div class="date_wrap" :style="{borderWidth: borderWidth, borderColor: borderColor}">
 
-        <div v-for="(i, index) in currentDateArr" class="date_cont" @click="i.dayNum ? setDateText(index, i.timeStamp) : null" :style="{borderWidth: borderWidth, marginRight: '-' + borderWidth, marginBottom: '-' + borderWidth, borderColor: borderColor}">
-            <span class="date_text" :style="{top: borderWidth}">{{i.dayNum}}</span>
+        <div 
+            v-for="(i, index) in currentDateArr" 
+            class="date_cont" 
+            @click="i.dayNum ? setDateText(index, i.timeStamp) : null" 
+            @mouseenter="enter(index)"
+            @mouseleave="leave(index)"
+            :style="{
+                borderWidth: borderWidth, 
+                marginRight: '-' + borderWidth, 
+                marginBottom: '-' + borderWidth, 
+                borderColor: borderColor
+            }"
+        >
+            <span 
+                class="date_text" 
+                :style="{top: borderWidth}"
+                v-if="index !== corner"
+            >{{i.dayNum}}</span>
+
+            <span 
+                class="date_text iconfont icon-quxiao" 
+                :style="{top: borderWidth}"
+                v-if="index === corner"
+                @click="deleteDay"
+            ></span>
             <div class="date_cont_scroll">
                 <ul>
                     <li v-for="(note, key) in i.notepad" :class="key == 'notmalText' ? 'date_cont_center' : '' " :style="{color: notepadColor, fontSize: notepadFontSize}">
@@ -425,11 +459,22 @@ Vue.component("date", {
         return {
             currentDateArr: [],
             currentYear: "",
-            currentMouth: ""
+            currentMouth: "",
+            corner: ''
         };
     },
     props: ["date", "realTime", 'notepadConfig', 'notepadKeyConfig', 'notepadNormalText', 'batchDate', 'notepadColor', 'notepadFontSize', 'borderWidth', 'borderColor'],
     methods: {
+        enter(index){
+            this.corner = index
+        },  
+        leave(index){
+            this.corner = ''
+        },
+        deleteDay(e){
+            e.stopPropagation()
+            console.log(e)
+        },
         setDateText(index, timeStamp){
             this.$emit('changeBtn', 'date', {
                 index: index,
@@ -582,10 +627,11 @@ function calendar(id, options) {
             notepadColor: options.notepadColor || '#000',
             notepadFontSize: options.notepadFontSize || '12px',
             batchDate: options.batchDate,
-            selectorInput: options.selectorInput,
+            selectorInput: options.notepadKeyConfig,
             selectorOnOff: false,
             selectorTitle: '',
             selectorAll: false,
+            selectorData: '',
             dateIndex: '',
             timeStamp: ''
         },
@@ -594,7 +640,7 @@ function calendar(id, options) {
                 :date="date" 
                 :realTime="realTime" 
                 v-on:childBtnClick="childBtnClick" 
-                :selectorInput="notepadKeyConfig" 
+                :selectorInput="selectorInput" 
                 :selectorOnOff="selectorOnOff" 
                 v-on:changeBtn="changeBtn"
             ></v-header>
@@ -626,6 +672,7 @@ function calendar(id, options) {
                 :selectorOnOff="selectorOnOff" 
                 :selectorTitle="selectorTitle"
                 :selectorAll="selectorAll"
+                :selectorData="selectorData"
                 v-on:changeMsg="changeMsg"
                 v-on:changeBtn="changeBtn"
             ></selector>
@@ -642,7 +689,8 @@ function calendar(id, options) {
                     typeof options.prevBtnClick == 'function' && options.prevBtnClick.call(this)
                 }
                 typeof options.toogleBtnClick == 'function' && options.toogleBtnClick.call(this, {
-                    btnName: e.btnClick
+                    btnName: e.btnClick,
+                    currentDate: e.currentDate
                 })
             },
             notepadDateChange(data){
@@ -673,10 +721,11 @@ function calendar(id, options) {
                             exportDateArr.push({
                                 time: new Date(this.notepadConfig[i].time).transformation(),
                                 notepadText: { ...this.notepadConfig[i].notepadText},
-                                timeStamp: this.notepadConfig[i].time
+                                // timeStamp: this.notepadConfig[i].time
                             })
                         }
-                        options.dateNotepadChange(exportDateArr)
+                        let currentDate = `${this.date.split('-')[0]}-${this.date.split('-')[1] > 9 ? this.date.split('-')[1] : `0${this.date.split('-')[1]}`}`
+                        options.dateNotepadChange.call(this, currentDate, exportDateArr)
                     }
                 }else {
                     let notepadConfig = [...this.notepadConfig] //改变对象的引用的地址 否则vue监听不到数据变化
@@ -697,7 +746,7 @@ function calendar(id, options) {
                             exportDateArr.push({
                                 time: new Date(dateMsg.time).transformation(),
                                 notepadText: { ...dateMsg.notepadText }, // 防止改变数组时影响vue数据
-                                timeStamp: dateMsg.time
+                                // timeStamp: dateMsg.time
                             })
                             add = false
                             break
@@ -712,11 +761,12 @@ function calendar(id, options) {
                         exportDateArr.push({
                             time: new Date(dateMsg.time).transformation(),
                             notepadText: { ...dateMsg.notepadText}, // 防止改变数组时影响vue数据
-                            timeStamp: dateMsg.time
+                            // timeStamp: dateMsg.time
                         })
                     }
                     this.notepadConfig = notepadConfig
-                    typeof options.dateNotepadChange == 'function' && options.dateNotepadChange(exportDateArr)
+                    let currentDate = `${this.date.split('-')[0]}-${this.date.split('-')[1] > 9 ? this.date.split('-')[1] : `0${this.date.split('-')[1]}`}`
+                    typeof options.dateNotepadChange == 'function' && options.dateNotepadChange.call(this, currentDate, exportDateArr)
                 }
                 
             },
@@ -725,8 +775,9 @@ function calendar(id, options) {
                 if(id == 'header'){
                     this.selectorTitle = '批量设置'
                     this.selectorAll = true
-                }else{
+                }else if(id !== 'selector') {
                     this.selectorTitle = '设置'
+                    this.selectorData = data.timeStamp
                     this.selectorAll = false
                 }
                 if (data && id == 'date'){

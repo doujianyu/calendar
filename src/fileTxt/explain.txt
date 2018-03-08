@@ -33,11 +33,14 @@ options 组件配置
         },
         nextBtnClick: function(){
             // 点击下一个月按钮时触发
+            // this.notepadConfigUpdata 更新页面
         },
         prevBtnClick: function(){
             // 点击上一个月按钮时触发
+            // this.notepadConfigUpdata 更新页面
         },
         toogleBtnClick: function(data){
             // 点击上一个月和下一个月都会触发 data中带有标识
+            // this.notepadConfigUpdata 更新页面
         }
     }

@@ -1,0 +1,11 @@
+
+安装 TypeScript 环境
+    需要有NodeJs环境 和 npm
+    运行 npm i -g typescript
+    运行 tsc -v 检测是否成功
+
+编译代码
+    tsc ts文件
+        输出一个同名的js文件
+
+

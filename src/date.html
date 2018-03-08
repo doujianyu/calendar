@@ -52,8 +52,18 @@
                 },
             ],
             batchDate: ['2018-02-01', '2018-02-31'],
-            dateNotepadChange: (res) =>{
+            dateNotepadChange: function(res) {
                 console.log(res)
+                console.log(this.notepadConfigUpdata = [
+                    {
+                        time: '2018-03-02',
+                        notepadText: {
+                            price: '1800.00',
+                            number: 'qweqwe'
+                        }
+                    }
+                ])
+
             },
             nextBtnClick: function() {
                 this.notepadConfigUpdata = [
@@ -79,7 +89,6 @@
             },
             toogleBtnClick: function (data) {
                 console.log("ssaas",data)
-                console.log('toogle', this)
             }
         })
 
