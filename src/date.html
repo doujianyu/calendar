@@ -52,8 +52,9 @@
                 },
             ],
             batchDate: ['2018-02-01', '2018-02-31'],
-            dateNotepadChange: function(res) {
-                console.log(res)
+            dateNotepadChange: function(day, data) {
+                console.log(day)
+                console.log(data)
                 console.log(this.notepadConfigUpdata = [
                     {
                         time: '2018-03-02',
@@ -64,6 +65,10 @@
                     }
                 ])
 
+            },
+            deleteCallBack: function (day, data) {
+                console.log(day)
+                console.log(data)
             },
             nextBtnClick: function() {
                 this.notepadConfigUpdata = [

@@ -13,6 +13,7 @@ li {
 
 button {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    cursor: pointer;
     outline: none;
 }
 
@@ -185,6 +186,7 @@ button {
                 margin-bottom: 8px;
                 height: $height;
                 line-height: $height;
+                position: relative;
             }
             i {
                 width: 12px;
@@ -236,6 +238,9 @@ button {
             }
             label {
                 flex: 1;
+                input {
+                    cursor: pointer;
+                }
             }
         }
         .date_picker_wrap {
@@ -252,11 +257,32 @@ button {
             display: inline-block;
             text-align: center;
             border: 1px solid #ccc;
+            cursor: pointer;
         }
         div:first-child {
             background: #2711f0;
             border: 0;
             color: #fff;
+        }
+    }
+    &_inputprice {
+        &:after {
+            content: attr(data-tip); // content: "请输入数字,小数点后最多两位";
+            width: 100%;
+            line-height: 22px;
+            text-align: center;
+            font-size: 12px;
+            position: absolute;
+            left: 0;
+            top: 100%;
+            display: none;
+        }
+    }
+    &_inputprice_not {
+        &:after{
+            content: attr(data-tip);
+            display: block;
+            color: red;
         }
     }
 }
@@ -344,7 +370,7 @@ button {
             right: 0;
             background: #fff;
         }
-        .icon-quxiao{
+        .icon-quxiao {
             color: red;
             font-size: 18px;
             z-index: 999;

@@ -252,10 +252,14 @@ Vue.component('selector', {
             
             <div class="selector_inp">
                 <ul>
-                    <li v-for="(item, index) in selectorInput">
+                    <li 
+                        v-for="(item, index) in selectorInput"
+                        :class="'selector_input' + index"
+                        data-tip=""
+                    >
                         <label :for="'selector_input' + index">{{item}}</label>
                         <i>:</i>
-                        <input type="text" :id="'selector_input' + index" :placeholder="'请输入' + item" v-model="inputVals[index]"/>
+                        <input type="text" :id="'selector_input' + index" :placeholder="'请输入' + item" value="" v-model="inputVals[index]" ref="selectorInput"/>
                     </li>
                 </ul>
             </div>
@@ -279,7 +283,7 @@ Vue.component('selector', {
                         >
                         </el-date-picker>
                     </li>
-                    <li>星期范围:</li>
+                    <li>星期范围: 不单独选择时默认全部设置</li>
                     <li class="week_input_wrap">
                         <label>
                             <input type="checkbox" name="sun" v-model="week[0]" value="0"/>
@@ -346,10 +350,14 @@ Vue.component('selector', {
         'selectorInput',
         'selectorTitle',
         'selectorAll',
-        'selectorData'
+        'selectorData',
+        'selectCurrentData'
     ],
+    
     watch: {
-        
+        selectCurrentData(newVal){
+            this.inputVals = newVal
+        }
     },
     methods: {
         selectorShowHide(index){
@@ -370,7 +378,7 @@ Vue.component('selector', {
             
             if (this.selectorAll){
                 if (!this.startDate || !this.endDate) {
-                    alert('时间格式不正确')
+                    alert('请选择时间')
                     return
                 }
                 let startDate = this.startDate.split('-')
@@ -409,7 +417,34 @@ Vue.component('selector', {
         }
     },
     mounted(){
-        
+        console.log(this.selectCurrentData)
+        let priceReg = /^[0-9]+(\.[0-9]{0,2}){0,}$/
+        console.log(priceReg.test('123.16'))
+        for (let i = 0; i < this.$refs.selectorInput.length; i++) {
+            let ele = this.$refs.selectorInput[i]
+
+            ele.id.indexOf('price') > -1 && (ele.onfocus = function(){
+                this.parentNode.className = 'selector_inputprice selector_inputprice_not'
+                this.parentNode.setAttribute('data-tip', '请输入数字,小数点后最多两位')
+                if (priceReg.test(this.value)) {
+                    this.parentNode.className = 'selector_inputprice'
+                } else {
+                    this.parentNode.setAttribute('data-tip', '输入有误!请输入数字')
+                    this.parentNode.className = 'selector_inputprice selector_inputprice_not'
+                }
+            },
+            ele.oninput = function () {
+                if(priceReg.test(this.value)){
+                    this.parentNode.className = 'selector_inputprice'
+                }else{
+                    this.parentNode.setAttribute('data-tip', '输入有误!请输入数字')
+                    this.parentNode.className = 'selector_inputprice selector_inputprice_not'
+                }
+            },
+            ele.onblur = function() {
+                this.parentNode.className = 'selector_inputprice'
+            })
+        }
     }
 }) 
 
@@ -440,8 +475,9 @@ Vue.component("date", {
             <span 
                 class="date_text iconfont icon-quxiao" 
                 :style="{top: borderWidth}"
-                v-if="index === corner"
-                @click="deleteDay"
+                v-if="i.dayNum && index === corner"
+                :data-day="i.dayNum"
+                @click="deleteDay($event, index)"
             ></span>
             <div class="date_cont_scroll">
                 <ul>
@@ -471,14 +507,21 @@ Vue.component("date", {
         leave(index){
             this.corner = ''
         },
-        deleteDay(e){
+        deleteDay(e, index){
             e.stopPropagation()
-            console.log(e)
+            if(confirm('确定删除这一天吗?')){
+                this.$emit('deleteBtn', {
+                    index: index,
+                    timeStamp: this.currentDateArr[index].timeStamp
+                })
+            }
+            
         },
         setDateText(index, timeStamp){
             this.$emit('changeBtn', 'date', {
                 index: index,
-                timeStamp: timeStamp
+                timeStamp: timeStamp,
+                notepadText: this.currentDateArr[index].notepad
             })
         },
         getDateList() {
@@ -571,21 +614,22 @@ Vue.component("date", {
                 }
             }
         ],
-        dateNotepadChange: function(){
-            // 数据改变时的回调函数
+        dateNotepadChange: function(day, data){
+            // 数据改变时的回调函数 day 当前显示的月份 data 修改的数据
+        },
+        deleteCallBack： function(day, data){
+            // day 当前显示的月份 data 删除的数据日期
         },
         nextBtnClick: function(){
             // 点击下一个月按钮时触发
-            // this.notepadConfigUpdata 改变notepadConfigUpdata可以更新数据
         },
         prevBtnClick: function(){
             // 点击上一个月按钮时触发
-            // this.notepadConfigUpdata 改变notepadConfigUpdata可以更新数据
         },
         toogleBtnClick: function(data){
             // 点击上一个月和下一个月都会触发 data中带有标识
-            // this.notepadConfigUpdata 改变notepadConfigUpdata可以更新数据
         }
+        // 回调函数中使用 this.notepadConfigUpdata 改变notepadConfigUpdata可以更新数据从新渲染页面
     }
 */
 
@@ -632,6 +676,7 @@ function calendar(id, options) {
             selectorTitle: '',
             selectorAll: false,
             selectorData: '',
+            selectCurrentData: {},
             dateIndex: '',
             timeStamp: ''
         },
@@ -663,12 +708,14 @@ function calendar(id, options) {
                 :notepadColor="notepadColor"
                 :borderWidth="borderWidth"
                 :borderColor="borderColor"
+                v-on:deleteBtn="deleteBtn"
                 v-on:changeBtn="changeBtn"
                 v-on:notepadDateChange="notepadDateChange"
             ></date>
 
             <selector 
-                :selectorInput="notepadKeyConfig" 
+                :selectorInput="notepadKeyConfig"
+                :selectCurrentData="selectCurrentData" 
                 :selectorOnOff="selectorOnOff" 
                 :selectorTitle="selectorTitle"
                 :selectorAll="selectorAll"
@@ -679,6 +726,19 @@ function calendar(id, options) {
             
         </div>`,
         methods: {
+            deleteBtn(data){
+                let currentDate = `${this.date.split('-')[0]}-${this.date.split('-')[1] > 9 ? this.date.split('-')[1] : `0${this.date.split('-')[1]}`}`
+                for(let i = 0; i < this.notepadConfig.length; i++){
+                    console.log(this.notepadConfig[i].timeStamp)
+                    if (this.notepadConfig[i].time == data.timeStamp){
+                        this.notepadConfig.splice(i, 1)
+                        break
+                    }
+                }
+                typeof options.deleteCallBack == 'function' && options.deleteCallBack.call(this, currentDate, {
+                    time: new Date(data.timeStamp).transformation()
+                })
+            },
             childBtnClick(e) {
                 let time = e.time.split("-");
                 this.realTime && time[1]++;
@@ -781,6 +841,16 @@ function calendar(id, options) {
                     this.selectorAll = false
                 }
                 if (data && id == 'date'){
+                    
+                    let obj = {}
+                    for(let i in this.notepadKeyConfig){
+                        for (let k in data.notepadText){
+                            if (this.notepadKeyConfig[i] == k){
+                                obj[i] = data.notepadText[k]
+                            }
+                        }
+                    }
+                    this.selectCurrentData = obj
                     this.timeStamp = data.timeStamp
                 }
             }
