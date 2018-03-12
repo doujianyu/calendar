@@ -28,7 +28,9 @@ options 组件配置
                 }
             }
         ],
-        dateNotepadChange: function(){
+        dateNotepadChange: function(day, data){
+            // day 当前页面显示的月
+            // data 数据
             // 数据改变时的回调函数
         },
         nextBtnClick: function(){

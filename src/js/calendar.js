@@ -144,9 +144,13 @@ Vue.component("v-header", {
             {{currentYear}}年 {{currentMonth + 1 < 10 ? '0' + (currentMonth + 1) : currentMonth + 1}}月
         </div>
 
-        <div slot="btnThree"></div>
+        <div slot="btnThree" class="btnThree">
+            <div class="header_button" data-id="0" @click="selectorShowHide">
+                批量删除
+            </div>
+        </div>
         <div slot="btnFour" class="btnFour">
-            <div class="header_button" @click="selectorShowHide">
+            <div class="header_button" data-id="1" @click="selectorShowHide">
                 批量设置
             </div>
         </div>
@@ -170,8 +174,9 @@ Vue.component("v-header", {
     },
     props: ["date", "realTime", 'selectorInput', 'selectorOnOff'],
     methods: {
-        selectorShowHide(){
-            this.$emit('changeBtn', 'header')
+        selectorShowHide(e){
+            let status = e.currentTarget.dataset.id == 0 ? 'del' : 'add'
+            this.$emit('changeBtn', 'header', status)
         },
         prev: function() {
             this.currentMonth--
@@ -250,7 +255,7 @@ Vue.component('selector', {
                 <span class="iconfont icon-guanbi" @click="selectorShowHide"></span>
             </div>
             
-            <div class="selector_inp">
+            <div class="selector_inp" v-if="selectorTop">
                 <ul>
                     <li 
                         v-for="(item, index) in selectorInput"
@@ -351,12 +356,18 @@ Vue.component('selector', {
         'selectorTitle',
         'selectorAll',
         'selectorData',
-        'selectCurrentData'
+        'selectCurrentData',
+        'selectorTop'
     ],
     
     watch: {
         selectCurrentData(newVal){
             this.inputVals = newVal
+        },
+        selectorOnOff(newVal){
+            if(!newVal){
+                this.inputVals = {}
+            }
         }
     },
     methods: {
@@ -375,7 +386,6 @@ Vue.component('selector', {
             }
         },
         determine(e){
-            
             if (this.selectorAll){
                 if (!this.startDate || !this.endDate) {
                     alert('请选择时间')
@@ -404,7 +414,7 @@ Vue.component('selector', {
                         notepadText: this.inputVals
                     })
                 }
-                this.$emit('changeMsg', dateArr, this.selectorAll)
+                this.$emit('changeMsg', dateArr, this.selectorAll, this.selectorTop)
                 this.inputVals = {} //改变对象的引用的地址防止改一全变
             }else{
                 
@@ -417,12 +427,9 @@ Vue.component('selector', {
         }
     },
     mounted(){
-        console.log(this.selectCurrentData)
         let priceReg = /^[0-9]+(\.[0-9]{0,2}){0,}$/
-        console.log(priceReg.test('123.16'))
         for (let i = 0; i < this.$refs.selectorInput.length; i++) {
             let ele = this.$refs.selectorInput[i]
-
             ele.id.indexOf('price') > -1 && (ele.onfocus = function(){
                 this.parentNode.className = 'selector_inputprice selector_inputprice_not'
                 this.parentNode.setAttribute('data-tip', '请输入数字,小数点后最多两位')
@@ -675,6 +682,7 @@ function calendar(id, options) {
             selectorOnOff: false,
             selectorTitle: '',
             selectorAll: false,
+            selectorTop: true,
             selectorData: '',
             selectCurrentData: {},
             dateIndex: '',
@@ -720,6 +728,7 @@ function calendar(id, options) {
                 :selectorTitle="selectorTitle"
                 :selectorAll="selectorAll"
                 :selectorData="selectorData"
+                :selectorTop="selectorTop"
                 v-on:changeMsg="changeMsg"
                 v-on:changeBtn="changeBtn"
             ></selector>
@@ -729,7 +738,6 @@ function calendar(id, options) {
             deleteBtn(data){
                 let currentDate = `${this.date.split('-')[0]}-${this.date.split('-')[1] > 9 ? this.date.split('-')[1] : `0${this.date.split('-')[1]}`}`
                 for(let i = 0; i < this.notepadConfig.length; i++){
-                    console.log(this.notepadConfig[i].timeStamp)
                     if (this.notepadConfig[i].time == data.timeStamp){
                         this.notepadConfig.splice(i, 1)
                         break
@@ -756,7 +764,29 @@ function calendar(id, options) {
             notepadDateChange(data){
                 this.notepadDateChange = data
             },
-            changeMsg(data){
+            changeMsg(data, selectorAll, selectorTop){
+                if(!selectorTop){ // 批量删除
+                    let currentDate = `${this.date.split('-')[0]}-${this.date.split('-')[1] > 9 ? this.date.split('-')[1] : `0${this.date.split('-')[1]}`}`
+
+                    let deleteDate = []
+
+                    for(let i = 0, I = this.notepadConfig.length; i < I; i++){
+                        if(this.notepadConfig[i]) {
+                            let notepadItemTimeStamp = this.notepadConfig[i].time
+                            for (let inx = 0, Inx = data.length; inx < Inx; inx++){
+                                let time = data[inx].time.split('-')
+                                let dataItemTimeStamp = Date.parse(new Date(time[0], time[1] - 1, time[2]))
+                                if(dataItemTimeStamp == notepadItemTimeStamp){
+                                    deleteDate.push(new Date(notepadItemTimeStamp).transformation())
+                                    this.notepadConfig.splice(i, 1)
+                                    i--
+                                }
+                            }
+                        }
+                    }
+                    options.dateNotepadChange.call(this, currentDate, deleteDate)
+                    return 
+                }
                 if (this.selectorAll){ //判断点击的是批量添加还是单个时间
                     let change = false
                     for(let i in data[0].notepadText){
@@ -833,12 +863,20 @@ function calendar(id, options) {
             changeBtn(id, data){ // 控制设置面板
                 this.selectorOnOff = !this.selectorOnOff
                 if(id == 'header'){
-                    this.selectorTitle = '批量设置'
-                    this.selectorAll = true
+                    if(data == 'add'){
+                        this.selectorTitle = '批量设置'
+                        this.selectorAll = true
+                        this.selectorTop = true
+                    }else{
+                        this.selectorTitle = '批量删除'
+                        this.selectorAll = true
+                        this.selectorTop = false
+                    }
                 }else if(id !== 'selector') {
                     this.selectorTitle = '设置'
                     this.selectorData = data.timeStamp
                     this.selectorAll = false
+                    this.selectorTop = true
                 }
                 if (data && id == 'date'){
                     
