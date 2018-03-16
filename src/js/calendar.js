@@ -262,9 +262,17 @@ Vue.component('selector', {
                         :class="'selector_input' + index"
                         data-tip=""
                     >
-                        <label :for="'selector_input' + index">{{item}}</label>
+                        <label :for="'selector_input' + index" class="label_name">{{item}}</label>
                         <i>:</i>
-                        <input type="text" :id="'selector_input' + index" :placeholder="'请输入' + item" value="" v-model="inputVals[index]" ref="selectorInput"/>
+                        <span v-if="index == 'status'" class="radio_wrap">
+                            <label>
+                                <input type="radio" name="status" value="1" v-model="inputVals[index]" :checked="inputVals[index] == 1"/>是
+                            </label>
+                            <label>
+                                <input type="radio" name="status" value="-1" v-model="inputVals[index]" :checked="inputVals[index] == -1"/>否
+                            </label>
+                        </span>
+                        <input v-if="!(index == 'status')" class="inputText" type="text" :id="'selector_input' + index" :placeholder="'请输入' + item" value="" v-model="inputVals[index]" ref="selectorInput"/>
                     </li>
                 </ul>
             </div>
@@ -417,7 +425,6 @@ Vue.component('selector', {
                 this.$emit('changeMsg', dateArr, this.selectorAll, this.selectorTop)
                 this.inputVals = {} //改变对象的引用的地址防止改一全变
             }else{
-                
                 this.$emit('changeMsg', {
                     notepadText: this.inputVals 
                 }, this.selectorAll)
@@ -428,6 +435,7 @@ Vue.component('selector', {
     },
     mounted(){
         let priceReg = /^[0-9]+(\.[0-9]{0,2}){0,}$/
+        if (!this.$refs.selectorInput) return
         for (let i = 0; i < this.$refs.selectorInput.length; i++) {
             let ele = this.$refs.selectorInput[i]
             ele.id.indexOf('price') > -1 && (ele.onfocus = function(){
@@ -490,7 +498,9 @@ Vue.component("date", {
                 <ul>
                     <li v-for="(note, key) in i.notepad" :class="key == 'notmalText' ? 'date_cont_center' : '' " :style="{color: notepadColor, fontSize: notepadFontSize}">
                         <span>{{key == 'notmalText' ? '' : key + ' : '}}</span>
-                        <span>{{note}}</span>
+                        <span>
+                            {{notepadKeyConfig['status'] == key && note == 1 ? '是' : notepadKeyConfig['status'] == key && note == -1 ? '否' : note}}
+                        </span>
                     </li>
                 </ul>
             </div>
@@ -608,16 +618,18 @@ Vue.component("date", {
         notepadNormalText: '单元格默认文本 默认为空'，
         notepadColor: '单元格文本颜色 默认黑色',
         notepadFontSize: '单元格文本大小 默认12px',
-        notepadKeyConfig: { //配置冒号前的名字 和对应的变量
+         notepadKeyConfig: { //配置冒号前的名字 和对应的变量
             price: '单价',
-            number: '数量'
+            number: '数量',
+            status: '接待' // 固定参数 代表单选状态
         },
         notepadConfig: [ //指定某天显示的文本
             {
                 time: '2018-03-01',
                 notepadText: {
                     price: '1800.00',
-                    number: '1'
+                    number: '1',
+                    status: '1' // 1为真 -1为假
                 }
             }
         ],
@@ -765,7 +777,7 @@ function calendar(id, options) {
                 this.notepadDateChange = data
             },
             changeMsg(data, selectorAll, selectorTop){
-                if(!selectorTop){ // 批量删除
+                if(selectorTop !== undefined && !selectorTop){ // 批量删除
                     let currentDate = `${this.date.split('-')[0]}-${this.date.split('-')[1] > 9 ? this.date.split('-')[1] : `0${this.date.split('-')[1]}`}`
 
                     let deleteDate = []

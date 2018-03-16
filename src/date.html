@@ -32,38 +32,41 @@
             titleWeekFontSize: '20px',
             titleWeekFontColor: 'red',
             notepadKeyConfig: {
-                price: '单价',
-                number: '数量'
+                // price: '单价',
+                // number: '数量',
+                status: '接待' // 固定参数 代表单选状态
             },
             notepadConfig: [
                 {
                     time: '2018-03-01',
                     notepadText: {
-                        price: '1800.00',
-                        number: '1'
+                        // price: '1800.00',
+                        // number: '1',
+                        status: '1' // 1为真 -1为假
                     }
                 },
                 {
                     time: '2018-03-02',
                     notepadText: {
-                        price: '1800.00',
-                        number: '1aa'
+                        // price: '1800.00',
+                        // number: '1aa',
+                        status: '-1' // 1为真 -1为假
                     }
                 },
             ],
             batchDate: ['2018-02-01', '2018-02-31'],
             dateNotepadChange: function(day, data) {
-                console.log(day)
-                console.log(data)
-                console.log(this.notepadConfigUpdata = [
-                    {
-                        time: '2018-03-02',
-                        notepadText: {
-                            price: '1800.00',
-                            number: 'qweqwe'
-                        }
-                    }
-                ])
+                // console.log(day)
+                console.log('asdas',data)
+                // console.log(this.notepadConfigUpdata = [
+                //     {
+                //         time: '2018-03-02',
+                //         notepadText: {
+                //             price: '1800.00',
+                //             number: 'qweqwe'
+                //         }
+                //     }
+                // ])
 
             },
             deleteCallBack: function (day, data) {
