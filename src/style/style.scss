@@ -196,7 +196,7 @@ button {
                 font-style: normal;
                 display: inline-block;
             }
-            label {
+            .label_name {
                 width: 50px;
                 height: $height;
                 font-size: 14px;
@@ -206,7 +206,21 @@ button {
                 white-space: nowrap;
                 vertical-align: -14px;
             }
-            input {
+            .radio_wrap{
+                width: 152px;
+                height: 34px;
+                display: inline-block;
+                font-size: 14px;
+                label{
+                    height: 50px;
+                    margin-right: 12px;
+                }
+                input{
+                    margin-right: 8px;
+                    vertical-align: middle;
+                }
+            }
+            .inputText {
                 width: 152px;
                 outline: none;
                 height: 30px;
